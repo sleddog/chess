@@ -1,0 +1,46 @@
+[06-Apr-2014 22:59:52] PHP Parse error:  syntax error, unexpected T_ELSEIF in /home1/devingra/public_html/chess/index.php on line 49
+[06-Apr-2014 23:00:06] PHP Parse error:  syntax error, unexpected T_ELSE in /home1/devingra/public_html/chess/index.php on line 49
+[06-Apr-2014 23:00:08] PHP Parse error:  syntax error, unexpected T_ELSE in /home1/devingra/public_html/chess/index.php on line 49
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:00:54] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:43] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:01:45] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 68
+[06-Apr-2014 23:02:43] PHP Parse error:  syntax error, unexpected ';' in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:02:51] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:03:24] PHP Warning:  sprintf() [<a href='function.sprintf'>function.sprintf</a>]: Too few arguments in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:04:45] PHP Fatal error:  Call to undefined function border_width() in /home1/devingra/public_html/chess/index.php on line 64
+[06-Apr-2014 23:15:57] PHP Parse error:  syntax error, unexpected ')' in /home1/devingra/public_html/chess/index.php on line 78
