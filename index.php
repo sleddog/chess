@@ -1,4 +1,9 @@
 <?php
+/*
+*  Author:  devingray@gmail.com
+*  Very simple chess application written in HTML/Javascript on the frontend that 
+*  invokes a CGI program written in C
+*/
 
 $white_king = "&#9812;";
 $white_queen  = "&#9813;";
@@ -71,7 +76,7 @@ function draw_chess_board() {
     $board .= '</tr>';
     for($j=0; $j<4; $j++) {
         $board .= '<tr style="vertical-align:bottom;">';
-        $board .= '<td style="vertical-align:middle;width:12pt">' . (5-$j) . '</td>';
+        $board .= '<td style="vertical-align:middle;width:12pt">' . (6-$j) . '</td>';
         for($i=0; $i<8; $i++) {
             $board .= '<td style="width:38pt; height:24pt; border-collapse:collapse; border-color: black; border-style: solid; border-width: ' . border_width($i) . '"' .  bg_color($i+$j) . '><span style="font-size:250%;">' . '&nbsp;' . '</span></td>';
         }
@@ -127,23 +132,17 @@ Devin Gray's chess experiment
 <h1>Devin Gray's chess experiment</h1>
 
 <?=draw_chess_board();?>
-<div id="images"></div>
+<div id="next-move"></div>
  
 <script>
 (function() {
-  var flickerAPI = "http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?";
-  $.getJSON( flickerAPI, {
-    tags: "chess",
-    tagmode: "any",
-    format: "json"
+  var chessAI = "http://www.devingray.com/cgi-bin/chess_ai.cgi";
+  $.getJSON( chessAI, {
+    board: "ASDFG", // idea is to build a hash of the current chess board setup
+    move: "e2-e4" // this will be a legal chess move
   })
     .done(function( data ) {
-      $.each( data.items, function( i, item ) {
-        $( "<img>" ).attr( "src", item.media.m ).appendTo( "#images" );
-        if ( i === 3 ) {
-          return false;
-        }
-      });
+        alert(data);
     });
 })();
 </script>
