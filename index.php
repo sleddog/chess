@@ -107,16 +107,46 @@ function draw_chess_board() {
 
 ?>
 
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
 <title>
 Devin Gray's chess experiment
 </title>
+  <style>
+  img {
+    height: 100px;
+    float: left;
+  }
+  </style>
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 </head>
 <body>
+ 
 <h1>Devin Gray's chess experiment</h1>
 
 <?=draw_chess_board();?>
-
+<div id="images"></div>
+ 
+<script>
+(function() {
+  var flickerAPI = "http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?";
+  $.getJSON( flickerAPI, {
+    tags: "chess",
+    tagmode: "any",
+    format: "json"
+  })
+    .done(function( data ) {
+      $.each( data.items, function( i, item ) {
+        $( "<img>" ).attr( "src", item.media.m ).appendTo( "#images" );
+        if ( i === 3 ) {
+          return false;
+        }
+      });
+    });
+})();
+</script>
+ 
 </body>
 </html>
