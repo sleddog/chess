@@ -163,14 +163,14 @@ function square_to_coord(square) {
 }
 
 function square_select(button) {
-    console.log(button);
-    console.log(button.id);
+    //console.log(button);
+    //console.log(button.id);
     var coord = square_to_coord(button.id);
-    console.log('coord=');
-    console.log(coord);
+    //console.log('coord=');
+    //console.log(coord);
     var value = board[coord[0]][coord[1]];
-    console.log('value=');
-    console.log(value);
+    //console.log('value=');
+    //console.log(value);
 
     if(selectedSquare == 0) {
         //determine if there is even a piece on this square
@@ -214,6 +214,40 @@ function square_select(button) {
 
 function highlight_legal_moves(selectedSquare) {
     //inspect the board, and determine what the legal moves are
+    console.log(selectedSquare);
+    var coord = square_to_coord(selectedSquare);
+    console.log(coord);
+    console.log(board);
+    var piece = board[coord[0]][coord[1]];
+    console.log(piece);
+    var color = piece.substring(0,1);
+    var type = piece.substring(1,2);
+    switch(type) {
+        case 'p':
+            return pawn_moves(coord);
+            break;
+        default:
+            console.log('default case');
+            console.log(type);
+            break;
+    }
+}
+
+function coord_to_square(coord) {
+    console.log('coord_to_square');
+    console.log(coord);
+    var letter = num_to_letter[coord[1]]
+    return letter + (coord[0]+1);
+}
+
+function pawn_moves(coord) {
+    //from the given coord, highlight legal pawn moves
+    console.log('pawn_moves');
+    console.log(coord);
+    var newCoord = [coord[0]+1, coord[1]];
+    console.log(newCoord);
+    var oneInFrontSquare = coord_to_square(newCoord);
+    console.log(oneInFrontSquare);
 }
 
 //onload
