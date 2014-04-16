@@ -65,21 +65,31 @@ function draw_chess_board_from_config($board_json) {
 <head>
   <meta charset="utf-8">
 <title>
-Devin Gray's chess experiment
+Chess by Devin Gray
 </title>
-  <style>
-  img {
-    height: 100px;
-    float: left;
-  }
-  </style>
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 </head>
 <body>
  
-<h1>Devin Gray's chess experiment</h1>
+<b>Chess by Devin Gray</b><br />
+open source code chess application (view on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a>)<br />
 
+<table><tr><td valign=top>
 <?=draw_chess_board_from_config($initial_board_json);?>
+</td>
+<td valign=top>
+History:<br />
+<div id='move_history'>
+</div>
+<br />
+<div id='submit_move_div'>
+<input type='text' id='piece_from' style='width:40px; font-size: 35px' />
+-
+<input type='text' id='piece_to' style='width:40px; font-size: 35px' /><br />
+<input id='submit_move_button' type='button' value='Submit Move' onclick='submit_move()' disabled='true' />
+</div>
+</td>
+</tr></table>
 <div id="next-move"></div>
  
 <script>
@@ -89,10 +99,14 @@ var legal_moves = [];
 var board = null;
 var num_to_letter = ['a','b','c','d','e','f','g','h'];
 var pieces = JSON.parse('<?=json_encode($pieces); ?>');
-console.log(pieces);
+//console.log(pieces);
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
+}
+
+function piece_to_html(piece) {
+    return pieces[piece]['html'];
 }
 
 function letter_to_num(letter) {
@@ -118,11 +132,11 @@ function init_board(board_json) {
         }
     }
     //console.log(board);
-    print_board_to_console(board);
+    //print_board_to_console(board);
 }
 
 function print_board_to_console(board) {
-    for (var i=0; i<8; i++) {
+    for (var i=7; i>=0; i--) {
         var row = "";
         for (var j=0; j<8; j++) {
             row += "|" + ((board[i][j] == 0) ? "\u3000" : piece_to_unicode(board[i][j]));
@@ -134,17 +148,6 @@ function print_board_to_console(board) {
     }
 }
 
-
-function get_move_from_server(selectedMove) {
-  var chessAI = "http://www.devingray.com/cgi-bin/chess_ai.cgi";
-  $.getJSON( chessAI, {
-    board: '<?=$initial_board_json;?>',
-    move: selectedMove //"e2-e4" this will be a legal chess move
-  })
-    .done(function( data ) {
-        console.log(data);
-    });
-}
 
 function square_to_color(square) {
   var letter = square.substring(0,1);
@@ -163,14 +166,8 @@ function square_to_coord(square) {
 }
 
 function square_select(button) {
-    //console.log(button);
-    //console.log(button.id);
     var coord = square_to_coord(button.id);
-    //console.log('coord=');
-    //console.log(coord);
     var value = board[coord[0]][coord[1]];
-    //console.log('value=');
-    //console.log(value);
 
     if(selectedSquare == 0) {
         //determine if there is even a piece on this square
@@ -180,51 +177,160 @@ function square_select(button) {
         if(value.substring(0,1) == 'b') {
             return; // only allow white pieces to be selected at first
         }
-        selectedSquare = button.id;
-        button.style.backgroundColor = "lightgreen";
-        highlight_legal_moves(selectedSquare);
+        highlight_initial_move(button);
     }
     else {
+        //are they unselecting the first square?
         if(selectedSquare == button.id) {
-            button.style.backgroundColor = square_to_color(selectedSquare);
-            selectedSquare = 0;
-            legal_moves = [];
+            reset_initial_square();
             if(targetSquare != 0) {
                 document.getElementById(targetSquare).style.backgroundColor = square_to_color(targetSquare);
             }
         }
         else { //set target
             if(targetSquare != 0) {
-                document.getElementById(targetSquare).style.backgroundColor = square_to_color(targetSquare);
+                //if square was a previous legal move use highlight color
+                if(legal_moves.indexOf(targetSquare) > -1) {
+                    resetColor = "lightyellow";
+                }
+                else {
+                    resetColor = square_to_color(targetSquare);
+                }
+                document.getElementById(targetSquare).style.backgroundColor = resetColor;
             }
             //if they select another piece, restart selection
             if(value != 0) {
                 if(value.substring(0,1) == 'w') {
-                    document.getElementById(selectedSquare).style.backgroundColor = square_to_color(selectedSquare);
-                    selectedSquare = button.id;
-                    button.style.backgroundColor = "lightgreen";
+                    reset_initial_square();
+                    highlight_initial_move(button);
                     return;
                 }
             }
-            button.style.backgroundColor = "lightpink";
-            targetSquare = button.id;
+            //make sure they are selecting legal moves
+            if(legal_moves.indexOf(button.id) > -1) {
+                //reset if they pick the same exact target
+                if(targetSquare == button.id) {
+                    reset_target_square();
+                    return;
+                }
+                else {
+                    button.style.backgroundColor = "lightpink";
+                    targetSquare = button.id;
+                    enable_submit_move();
+                }
+            }
+            else {
+                reset_target_square();
+            }
         }
     }
 }
 
+function reset_initial_square() {
+    clear_legal_moves();
+    document.getElementById(selectedSquare).style.backgroundColor = square_to_color(selectedSquare);
+    selectedSquare = 0;
+    document.getElementById('piece_from').value = '';
+}
+
+function reset_target_square() {
+    targetSquare = 0;
+    document.getElementById('piece_to').value = '';
+    document.getElementById('submit_move_button').disabled = true;
+}
+
+function enable_submit_move() {
+    document.getElementById('submit_move_button').disabled = false;
+    document.getElementById('piece_to').value = targetSquare;
+}
+
+function submit_move() {
+    //validate one last time...
+    if(selectedSquare == 0 || targetSquare == 0) {
+        alert('error some how...');
+        return;
+    }
+    var selectedMove = selectedSquare + '-' + targetSquare;
+
+    //move the piece
+    move_pieces(selectedSquare, targetSquare);
+
+    //reset selections
+    reset_initial_square();
+    reset_target_square();
+
+    //now call the AI to get the computer's move
+    get_next_move(selectedMove);
+}
+
+function get_next_move(selectedMove) {
+    //determine what mode we are in... human vs human, human vs AI
+    //assuming for now to just be simple random AI
+    get_move_from_server(selectedMove); 
+}
+
+function get_move_from_server(selectedMove) {
+  var chessAI = "http://www.devingray.com/cgi-bin/chess_ai.cgi";
+  $.getJSON( chessAI, {
+    board: JSON.stringify(board), //'<?=$initial_board_json;?>',
+    move: selectedMove //"e2-e4" this will be a legal chess move
+  })
+    .done(function( data ) {
+        //console.log(data);
+        if(data['next-move']) {
+            make_move(data['next-move']);
+        }
+    });
+}
+
+function make_move(next_move) {
+    var moves = next_move.split('-');
+    if(moves.length != 2) {
+        alert('error with move: ' + next_move);
+        return;
+    }
+    //make sure this is a valid move
+    var old_coord = square_to_coord(moves[0]);
+    var piece = board[old_coord[0]][old_coord[1]];
+    if(piece && piece.substring(0,1) == 'b') {
+        move_pieces(moves[0], moves[1]);
+    }
+}
+
+function move_pieces(from, to) {
+    //move the piece
+    var old_coord = square_to_coord(from);
+    var new_coord = square_to_coord(to);
+    var piece = board[old_coord[0]][old_coord[1]];
+    board[old_coord[0]][old_coord[1]] = 0;
+    board[new_coord[0]][new_coord[1]] = piece;
+    //print_board_to_console(board);
+    document.getElementById(from).innerHTML = '&nbsp;';
+    document.getElementById(to).innerHTML = piece_to_html(piece);
+}
+
+
+function highlight_initial_move(button) {
+    clear_legal_moves();
+    selectedSquare = button.id;
+    button.style.backgroundColor = "lightgreen";
+    highlight_legal_moves(selectedSquare);
+    document.getElementById('piece_from').value = selectedSquare;
+}
+
 function highlight_legal_moves(selectedSquare) {
     //inspect the board, and determine what the legal moves are
-    console.log(selectedSquare);
+    //console.log(selectedSquare);
     var coord = square_to_coord(selectedSquare);
-    console.log(coord);
-    console.log(board);
+    //console.log(coord);
+    //console.log(board);
     var piece = board[coord[0]][coord[1]];
-    console.log(piece);
+    //console.log(piece);
     var color = piece.substring(0,1);
     var type = piece.substring(1,2);
     switch(type) {
         case 'p':
-            return pawn_moves(coord);
+            return legal_pawn_moves(coord, color);
             break;
         default:
             console.log('default case');
@@ -234,20 +340,44 @@ function highlight_legal_moves(selectedSquare) {
 }
 
 function coord_to_square(coord) {
-    console.log('coord_to_square');
-    console.log(coord);
-    var letter = num_to_letter[coord[1]]
+    var letter = num_to_letter[coord[1]];
     return letter + (coord[0]+1);
 }
 
-function pawn_moves(coord) {
-    //from the given coord, highlight legal pawn moves
-    console.log('pawn_moves');
-    console.log(coord);
-    var newCoord = [coord[0]+1, coord[1]];
-    console.log(newCoord);
-    var oneInFrontSquare = coord_to_square(newCoord);
-    console.log(oneInFrontSquare);
+//from the given coord, highlight legal pawn moves, for the respective color
+function legal_pawn_moves(coord, color) {
+    if(color == 'w') {
+        var newCoord = [coord[0]+1, coord[1]];
+        //if first square in front is blank 
+        if(board[newCoord[0]][newCoord[1]] == 0) {
+            add_legal_move(newCoord);
+
+            //now check 2 moves in front if on the 2nd row
+            if(coord[0] == 1) {
+                var newCoord2 = [coord[0]+2, coord[1]];
+                if(board[newCoord2[0]][newCoord2[1]] == 0) {
+                    add_legal_move(newCoord2);
+                }
+            } 
+        }
+    }
+    else { // color == 'b'
+    }
+}
+
+//highlight the legal move on the board for this coord and track in global array
+function add_legal_move(coord) {
+    var square = coord_to_square(coord);
+    document.getElementById(square).style.backgroundColor = 'lightyellow';
+    legal_moves.push(square);
+}
+
+function clear_legal_moves() {
+    for(var i=0; i<legal_moves.length; i++) {
+        var square = legal_moves[i];
+        document.getElementById(square).style.backgroundColor = square_to_color(square);
+    }
+    legal_moves = [];
 }
 
 //onload
