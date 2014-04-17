@@ -360,6 +360,29 @@ function legal_pawn_moves(coord, color) {
                 }
             } 
         }
+
+        //can you attack diagonally?
+        diag_right = [coord[0]+1, coord[1]+1];
+        if(diag_right[1] <= 7) {
+            var piece = board[diag_right[0]][diag_right[1]];
+            if(piece != 0) {
+                //if a piece exists and is black
+                if(piece.substring(0,1) == 'b') {
+                    add_legal_move(diag_right);
+                }
+            }
+        }
+        diag_left = [coord[0]+1, coord[1]-1];
+        if(diag_left[1] >= 0) {
+            var piece = board[diag_left[0]][diag_left[1]];
+            if(piece != 0) {
+                //if a piece exists and is black
+                if(piece.substring(0,1) == 'b') {
+                    add_legal_move(diag_left);
+                }
+            }
+        }
+
     }
     else { // color == 'b'
     }
