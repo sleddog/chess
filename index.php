@@ -81,16 +81,21 @@ open source code chess application (view on <a href="https://github.com/sleddog/
 History:<br />
 <div id='move_history'>
 </div>
-<br />
-<div id='submit_move_div'>
-<input type='text' id='piece_from' style='width:40px; font-size: 35px' />
--
-<input type='text' id='piece_to' style='width:40px; font-size: 35px' /><br />
-<input id='submit_move_button' type='button' value='Submit Move' onclick='submit_move()' disabled='true' />
-</div>
 </td>
 </tr></table>
-<div id="next-move"></div>
+
+<br />
+
+<div id='submit_move_div'>
+<table><tr><td align="right" valign="center" width="300">
+<input type='text' id='piece_from' style='width:40px; font-size: 35px' readonly="true" />
+<span style="font-size: 25px">-</span>
+<input type='text' id='piece_to' style='width:40px; font-size: 35px' readonly="true" />
+</td>
+<td valign="center">
+<input id='submit_move_button' type='button' value='Submit Move' onclick='submit_move()' disabled='true' style='font-size: 26px' />
+</td></tr></table>
+</div>
  
 <script>
 var selectedSquare = 0;
