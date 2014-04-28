@@ -236,6 +236,7 @@ function reset_initial_square() {
     document.getElementById(selectedSquare).style.backgroundColor = square_to_color(selectedSquare);
     selectedSquare = 0;
     document.getElementById('piece_from').value = '';
+    reset_target_square();
 }
 
 function reset_target_square() {
@@ -262,7 +263,6 @@ function submit_move() {
 
     //reset selections
     reset_initial_square();
-    reset_target_square();
 
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
