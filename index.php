@@ -41,7 +41,7 @@ function draw_chess_board_from_config($board_json) {
             $square = "$l$i";
             $color = (($j+$i) % 2 != 0) ? 'silver' : 'white';
             $piece = property_exists($config, $square) ? $pieces[$config->$square]['html'] : '&nbsp;';
-            $board .= "<td><button id='$square' type='button' style='width:75px; height:75px; font-size: 60px; background-color: $color' onclick='square_select(this)'>$piece</button></td>";
+            $board .= "<td><button id='$square' type='button' style='width:65px; height:65px; font-size: 50px; background-color: $color;' onclick='square_select(this)'>$piece</button></td>";
         }
         $board .= '</tr>';
     }
@@ -79,8 +79,9 @@ open source code chess application (view on <a href="https://github.com/sleddog/
 </td>
 <td valign=top>
 History:<br />
-<div id='move_history'>
-</div>
+<table id='move_history_table'>
+<tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
+</table>
 </td>
 </tr></table>
 
@@ -104,7 +105,7 @@ var legal_moves = [];
 var board = null;
 var num_to_letter = ['a','b','c','d','e','f','g','h'];
 var pieces = JSON.parse('<?=json_encode($pieces); ?>');
-//console.log(pieces);
+var history = [];
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -264,6 +265,9 @@ function submit_move() {
     //reset selections
     reset_initial_square();
 
+    //update the history
+    update_history('white', selectedMove);
+
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
 }
@@ -299,6 +303,8 @@ function make_move(next_move) {
     var piece = board[old_coord[0]][old_coord[1]];
     if(piece && piece.substring(0,1) == 'b') {
         move_pieces(moves[0], moves[1]);
+        //update the history
+        update_history('black', next_move);
     }
 }
 
@@ -406,6 +412,33 @@ function clear_legal_moves() {
         document.getElementById(square).style.backgroundColor = square_to_color(square);
     }
     legal_moves = [];
+}
+
+function update_history(player, move)
+{
+    var table = document.getElementById('move_history_table');
+    if(!table) {
+        return;
+    }
+
+    //based on the player, update the appropriate cell, or create new row
+    var rowCount = table.rows.length
+    if(player == 'white') {
+        var row = table.insertRow(rowCount);
+        var moveNumber = row.insertCell(0);
+        moveNumber.innerHTML = rowCount;
+        var white = row.insertCell(1);
+        white.innerHTML = move;
+    }
+    else { // black
+        var row = table.rows[rowCount-1];
+        var black = row.insertCell(2);
+        black.innerHTML = move;
+    }
+
+    //update the history array with this move
+    history.push([player, move]);
+    console.log(history);
 }
 
 //onload
