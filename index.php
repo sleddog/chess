@@ -71,15 +71,15 @@ Chess by Devin Gray
 </head>
 <body>
  
-<b>Chess by Devin Gray</b><br />
-open source code chess application (view on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a>)<br />
-
 <table><tr><td valign=top>
 <?=draw_chess_board_from_config($initial_board_json);?>
 </td>
 <td valign=top>
-History:<br />
-<table id='move_history_table'>
+<b>Chess by Devin Gray</b><br />
+open source chess application<br />
+on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
+<hr />
+<table id='move_history_table' width='180'>
 <tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
 </table>
 </td>
@@ -446,6 +446,14 @@ function update_history(player, move)
   init_board('<?=$initial_board_json; ?>');
 })();
 
+</script>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-1105056-1");
+pageTracker._trackPageview();
 </script>
 
 </body>
