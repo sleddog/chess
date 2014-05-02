@@ -346,6 +346,9 @@ function highlight_legal_moves(selectedSquare) {
         case 'n':
             return legal_knight_moves(coord, color);
             break;
+        case 'b':
+            return legal_bishop_moves(coord, color);
+            break;
         default:
             console.log('default case');
             console.log(type);
@@ -446,6 +449,37 @@ function white_can_move(coord) {
         }
     }
 }
+
+
+function legal_bishop_moves(coord, color) {
+    if(color == 'w') {
+        //for each direction, travel until the edge of board or piece
+        var directions = [[1,1],[1,-1],[-1,-1],[-1,1]];
+        for(var i=0; i<4; i++) {
+            var dir = directions[i];
+            var step = 1;
+            while(true) {
+                var move = [coord[0]+(dir[0]*step), coord[1]+(dir[1]*step)];
+                console.log(move);
+                if(white_can_move(move)) {
+                    add_legal_move(move);
+                    step++;
+                    //if move is a black piece, stop calculating on this line
+                    var square = board[move[0]][move[1]];
+                    if(square != 0 && square.substring(0,1) == 'b') {
+                        break;
+                    }
+                }
+                else {
+                    break; //can't move here...
+                }
+            }
+        }
+    }
+    else { // color == 'b'
+    }
+}
+
 
 //highlight the legal move on the board for this coord and track in global array
 function add_legal_move(coord) {
