@@ -343,6 +343,9 @@ function highlight_legal_moves(selectedSquare) {
         case 'p':
             return legal_pawn_moves(coord, color);
             break;
+        case 'n':
+            return legal_knight_moves(coord, color);
+            break;
         default:
             console.log('default case');
             console.log(type);
@@ -399,6 +402,51 @@ function legal_pawn_moves(coord, color) {
     }
 }
 
+function legal_knight_moves(coord, color) {
+    if(color == 'w') {
+        //create an array of coords, based on knight's movement (L shape)
+        var moves = new Array(8); 
+        moves[0] = [coord[0]+2, coord[1]-1];
+        moves[1] = [coord[0]+2, coord[1]+1];
+        moves[2] = [coord[0]-2, coord[1]-1];
+        moves[3] = [coord[0]-2, coord[1]+1];
+        moves[4] = [coord[0]+1, coord[1]-2];
+        moves[5] = [coord[0]+1, coord[1]+2];
+        moves[6] = [coord[0]-1, coord[1]-2];
+        moves[7] = [coord[0]-1, coord[1]+2];
+        //check each move
+        for(var i=0; i<8; i++) {
+            if(white_can_move(moves[i])) {
+                add_legal_move(moves[i]);
+            }
+        }
+    }
+    else { // color == 'b'
+    }
+}
+
+function white_can_move(coord) {
+    //is off board?
+    if(coord[0] < 0 || coord[0] > 7 || coord[1] < 0 || coord[1] > 7) {
+        return false;
+    }
+    //is the square empty?
+    var square = board[coord[0]][coord[1]];
+    if(square == 0) {
+        return true;
+    }
+    else {
+        if(square.substring(0,1) == 'b') {
+            //black piece exists in this square
+            return true;
+        }
+        else {
+            //white piece is already in place here
+            return false;
+        }
+    }
+}
+
 //highlight the legal move on the board for this coord and track in global array
 function add_legal_move(coord) {
     var square = coord_to_square(coord);
@@ -438,7 +486,7 @@ function update_history(player, move)
 
     //update the history array with this move
     history.push([player, move]);
-    console.log(history);
+    //console.log(history);
 }
 
 //onload
