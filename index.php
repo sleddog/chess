@@ -20,10 +20,6 @@ $pieces = array(
     'bn'=>array('html'=>"&#9822;",'codepoint'=>'\u265E'),
     'bp'=>array('html'=>"&#9823;",'codepoint'=>'\u265F')
 );
-$initial_board_json = '{"a8":"br","b8":"bn","c8":"bb","d8":"bq","e8":"bk","f8":"bb","g8":"bn","h8":"br",';
-$initial_board_json .= '"a7":"bp","b7":"bp","c7":"bp","d7":"bp","e7":"bp","f7":"bp","g7":"bp","h7":"bp",';
-$initial_board_json .= '"a2":"wp","b2":"wp","c2":"wp","d2":"wp","e2":"wp","f2":"wp","g2":"wp","h2":"wp",';
-$initial_board_json .= '"a1":"wr","b1":"wn","c1":"wb","d1":"wq","e1":"wk","f1":"wb","g1":"wn","h1":"wr"}';
 
 function draw_chess_board_from_config($board_json) {
     global $pieces, $num_to_letter;
@@ -32,7 +28,7 @@ function draw_chess_board_from_config($board_json) {
     $config = json_decode($board_json);
     //echo "<pre>".print_r($board_config, true)."</pre>";
 
-    $board = '<table><tbody>';
+    $board = '<table class="table table-bordered" align="center" style="height:100%"><tbody>';
     for($i=8; $i>=1; $i--) {
         $board .= '<tr>';
         $board .= "<td>$i</td>";
@@ -41,7 +37,7 @@ function draw_chess_board_from_config($board_json) {
             $square = "$l$i";
             $color = (($j+$i) % 2 != 0) ? 'silver' : 'white';
             $piece = property_exists($config, $square) ? $pieces[$config->$square]['html'] : '&nbsp;';
-            $board .= "<td><button id='$square' type='button' style='width:65px; height:65px; font-size: 50px; background-color: $color;' onclick='square_select(this)'>$piece</button></td>";
+            $board .= "<td><button class='btn btn-default' id='$square' type='button' style='width:85px; height:85px; background-color: $color; font-size:50px' onclick='square_select(this)'>$piece</button></td>";
         }
         $board .= '</tr>';
     }
@@ -58,46 +54,96 @@ function draw_chess_board_from_config($board_json) {
 }
 
 
+function get_initial_board()
+{
+    $board = '{"a8":"br","b8":"bn","c8":"bb","d8":"bq","e8":"bk","f8":"bb","g8":"bn","h8":"br",';
+    $board .= '"a7":"bp","b7":"bp","c7":"bp","d7":"bp","e7":"bp","f7":"bp","g7":"bp","h7":"bp",';
+    $board .= '"a2":"wp","b2":"wp","c2":"wp","d2":"wp","e2":"wp","f2":"wp","g2":"wp","h2":"wp",';
+    $board .= '"a1":"wr","b1":"wn","c1":"wb","d1":"wq","e1":"wk","f1":"wb","g1":"wn","h1":"wr"}';
+    return $board;
+}
+
+
+function get_random_board()
+{
+    global $num_to_letter, $pieces;
+    $blank_chance = $_GET['blank_chance'] >= 0 ? intval($_GET['blank_chance']) : 50;
+
+    $board = '{';
+
+    for($i=8; $i>=1; $i--) {
+        for($j=0; $j<8; $j++) {
+            $l = $num_to_letter[$j];
+            $square = "$l$i";
+            if(rand(0,100) > $blank_chance) {
+                continue; //allow for blank pieces
+            }
+            $rand_piece = array_rand($pieces); //rand_piece();
+            if($rand_piece) {
+                $board .= '"'.$square.'":"'.$rand_piece.'",';
+            }
+        }
+    }
+    $board = rtrim($board, ",");
+    $board .= '}';
+    return $board;
+}
+
+
+//define what board JSON to use for initial load
+if($_GET['random']) {
+    $board_to_draw = get_random_board(); 
+}
+else {
+    $board_to_draw = get_initial_board();
+}
 ?>
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-<title>
-Chess by Devin Gray
-</title>
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-</head>
-<body>
- 
-<table><tr><td valign=top>
-<?=draw_chess_board_from_config($initial_board_json);?>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chess by Devin Gray</title>
+
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+<div class='container fill' style='height:100%'>
+<table class='table' align="center" style='height:100%'><tr><td valign=top>
+<div class="table-responsive" style='height:100%'>
+<?=draw_chess_board_from_config($board_to_draw);?>
+</div>
 </td>
 <td valign=top>
 <b>Chess by Devin Gray</b><br />
 open source chess application<br />
 on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
+<div id='submit_move_div'>
+<input type='text' class='input-sm' style='width:45px' id='piece_from' readonly="true" />
+<span>-</span>
+<input type='text' class='input-sm' style='width:45px' id='piece_to' readonly="true" />
+<input class='btn btn-default' id='submit_move_button' type='button' value='Submit Move' onclick='submit_move()' disabled='true'/>
+</div>
+<hr />
 <table id='move_history_table' width='180'>
 <tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
 </table>
 </td>
 </tr></table>
-
-<br />
-
-<div id='submit_move_div'>
-<table><tr><td align="right" valign="center" width="300">
-<input type='text' id='piece_from' style='width:40px; font-size: 35px' readonly="true" />
-<span style="font-size: 25px">-</span>
-<input type='text' id='piece_to' style='width:40px; font-size: 35px' readonly="true" />
-</td>
-<td valign="center">
-<input id='submit_move_button' type='button' value='Submit Move' onclick='submit_move()' disabled='true' style='font-size: 26px' />
-</td></tr></table>
 </div>
- 
+
 <script>
 var selectedSquare = 0;
 var targetSquare = 0;
@@ -281,7 +327,7 @@ function get_next_move(selectedMove) {
 function get_move_from_server(selectedMove) {
   var chessAI = "http://www.devingray.com/cgi-bin/chess_ai.cgi";
   $.getJSON( chessAI, {
-    board: JSON.stringify(board), //'<?=$initial_board_json;?>',
+    board: JSON.stringify(board),
     move: selectedMove //"e2-e4" this will be a legal chess move
   })
     .done(function( data ) {
@@ -525,7 +571,7 @@ function update_history(player, move)
 
 //onload
 (function() {
-  init_board('<?=$initial_board_json; ?>');
+  init_board('<?=$board_to_draw; ?>');
 })();
 
 </script>
@@ -538,5 +584,9 @@ var pageTracker = _gat._getTracker("UA-1105056-1");
 pageTracker._trackPageview();
 </script>
 
-</body>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  </body>
 </html>
