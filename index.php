@@ -67,21 +67,17 @@ function get_initial_board()
 function get_random_board()
 {
     global $num_to_letter, $pieces;
-    $blank_chance = $_GET['blank_chance'] >= 0 ? intval($_GET['blank_chance']) : 50;
-
+    $blank_chance = $_GET['blank_chance'] != null ? intval($_GET['blank_chance']) : rand(0,100);
     $board = '{';
-
     for($i=8; $i>=1; $i--) {
         for($j=0; $j<8; $j++) {
             $l = $num_to_letter[$j];
             $square = "$l$i";
-            if(rand(0,100) > $blank_chance) {
+            if(rand(1,100) > $blank_chance) {
                 continue; //allow for blank pieces
             }
-            $rand_piece = array_rand($pieces); //rand_piece();
-            if($rand_piece) {
-                $board .= '"'.$square.'":"'.$rand_piece.'",';
-            }
+            $rand_piece = array_rand($pieces);
+            $board .= '"'.$square.'":"'.$rand_piece.'",';
         }
     }
     $board = rtrim($board, ",");
