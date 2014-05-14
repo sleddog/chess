@@ -23,27 +23,27 @@ $pieces = array(
 
 function draw_chess_board_from_config($board_json) {
     global $pieces, $num_to_letter;
+    $square_size = 80;
+    $font_size = $square_size * 0.5;
 
     //json representation of an initial chess board
     $config = json_decode($board_json);
-    //echo "<pre>".print_r($board_config, true)."</pre>";
-
-    $board = '<table class="table table-bordered" align="center" style="height:100%"><tbody>';
+    $board = '<table class="table"><tbody>';
     for($i=8; $i>=1; $i--) {
         $board .= '<tr>';
-        $board .= "<td>$i</td>";
+        $board .= "<td style='vertical-align:middle; border:0px'>$i</td>";
         for($j=0; $j<8; $j++) {
             $l = $num_to_letter[$j];
             $square = "$l$i";
             $color = (($j+$i) % 2 != 0) ? 'silver' : 'white';
             $piece = property_exists($config, $square) ? $pieces[$config->$square]['html'] : '&nbsp;';
-            $board .= "<td><button class='btn btn-default' id='$square' type='button' style='width:85px; height:85px; background-color: $color; font-size:50px' onclick='square_select(this)'>$piece</button></td>";
+            $board .= "<td style='padding:0; margin:0; border:0px' valign='center' align='center'><button class='btn btn-default' id='$square' type='button' style='width:${square_size}px; height:${square_size}px; background-color: $color; font-size:${font_size}px; border-radius:0px;' onclick='square_select(this)'>$piece</button></td>";
         }
         $board .= '</tr>';
     }
     $board .= '</tr>';
     $board .= '<tr>';
-    $board .= '<td></td>';
+    $board .= "<td style='border:0px'></td>";
     for($j=0; $j<8; $j++) {
         $l = $num_to_letter[$j];
         $board .= "<td align='center'>$l</td>";
@@ -115,13 +115,13 @@ else {
     <![endif]-->
   </head>
   <body>
-<div class='container fill' style='height:100%'>
-<table class='table' align="center" style='height:100%'><tr><td valign=top>
+<div class='container fill'>
+<table><tr><td valign=top style='padding:10px'>
 <div class="table-responsive" style='height:100%'>
 <?=draw_chess_board_from_config($board_to_draw);?>
 </div>
 </td>
-<td valign=top>
+<td valign=top style='padding:10px'>
 <b>Chess by Devin Gray</b><br />
 open source chess application<br />
 on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
