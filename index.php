@@ -321,7 +321,8 @@ function get_next_move(selectedMove) {
 }
 
 function get_move_from_server(selectedMove) {
-  var chessAI = "http://www.devingray.com/cgi-bin/chess_ai.cgi";
+  //var chessAI = "http://www.devingray.com/cgi-bin/chess_ai.cgi";
+  var chessAI = "http://www.devingray.com/cgi-bin/chess_go_ai.cgi";
   $.getJSON( chessAI, {
     board: JSON.stringify(board),
     move: selectedMove //"e2-e4" this will be a legal chess move

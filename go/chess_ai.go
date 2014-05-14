@@ -22,6 +22,7 @@ func randomColumn() string {
 
 func getNextMove() string {
 	var move string
+	var randChar string
 	randChar = randomColumn()
 	move = fmt.Sprintf("\"next-move\":\"%s7-%s5\"", randChar, randChar)
 	return move
