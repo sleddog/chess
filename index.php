@@ -391,6 +391,15 @@ function highlight_legal_moves(selectedSquare) {
         case 'b':
             return legal_bishop_moves(coord, color);
             break;
+        case 'r':
+            return legal_rook_moves(coord, color);
+            break;
+        case 'q':
+            return legal_queen_moves(coord, color);
+            break;
+        case 'k':
+            return legal_king_moves(coord, color);
+            break;
         default:
             console.log('default case');
             console.log(type);
@@ -492,36 +501,74 @@ function white_can_move(coord) {
     }
 }
 
+function check_directions(directions, coord, color) {
+    for(var i=0; i<directions.length; i++) {
+        var dir = directions[i];
+        var step = 1;
+        //for each direction, travel until the edge of board or piece
+        while(true) {
+            var move = [coord[0]+(dir[0]*step), coord[1]+(dir[1]*step)];
+            console.log(move);
+            if(white_can_move(move)) {
+                add_legal_move(move);
+                step++;
+                //if move is a black piece, stop calculating on this line
+                var square = board[move[0]][move[1]];
+                if(square != 0 && square.substring(0,1) == 'b') {
+                    break;
+                }
+            }
+            else {
+                break; //can't move here...
+            }
+        }
+    }
+}
 
 function legal_bishop_moves(coord, color) {
     if(color == 'w') {
-        //for each direction, travel until the edge of board or piece
         var directions = [[1,1],[1,-1],[-1,-1],[-1,1]];
-        for(var i=0; i<4; i++) {
-            var dir = directions[i];
-            var step = 1;
-            while(true) {
-                var move = [coord[0]+(dir[0]*step), coord[1]+(dir[1]*step)];
-                console.log(move);
-                if(white_can_move(move)) {
-                    add_legal_move(move);
-                    step++;
-                    //if move is a black piece, stop calculating on this line
-                    var square = board[move[0]][move[1]];
-                    if(square != 0 && square.substring(0,1) == 'b') {
-                        break;
-                    }
-                }
-                else {
-                    break; //can't move here...
-                }
+        check_directions(directions, coord, color);
+    }
+    else { // color == 'b'
+    }
+}
+
+
+function legal_rook_moves(coord, color) {
+    if(color == 'w') {
+        var directions = [[1,0],[0,1],[-1,0],[0,-1]];
+        check_directions(directions, coord, color);
+    }
+    else { // color == 'b'
+    }
+}
+
+
+function legal_queen_moves(coord, color) {
+    if(color == 'w') {
+        legal_bishop_moves(coord, color);
+        legal_rook_moves(coord, color);
+    }
+    else { // color == 'b'
+    }
+}
+
+
+function legal_king_moves(coord, color) {
+    if(color == 'w') {
+        var directions = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,-1],[-1,1]];
+        for(var i=0; i<directions.length; i++) {
+            var move = [coord[0]+directions[i][0], coord[1]+directions[i][1]];
+            if(white_can_move(move)) {
+                //TODO check if this square is being attacked (i.e. king can't move here)
+                add_legal_move(move);
             }
         }
     }
     else { // color == 'b'
     }
 }
-
 
 //highlight the legal move on the board for this coord and track in global array
 function add_legal_move(coord) {
