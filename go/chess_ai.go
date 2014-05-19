@@ -9,36 +9,37 @@ import (
 )
 
 var pieces = make(map[string]map[string]string)
-//pieces = {
-//  "wk": {"html": "&#9812;","codepoint":"\u2654"},
-//  "wq": {"html": "&#9813;","codepoint":"\u2655"},
-//  "wr": {"html": "&#9814;","codepoint":"\u2656"},
-//  "wb": {"html": "&#9815;","codepoint":"\u2657"},
-//  "wn": {"html": "&#9816;","codepoint":"\u2658"},
-//  "wp": {"html": "&#9817;","codepoint":"\u2659"},
-//  "bk": {"html": "&#9818;","codepoint":"\u265A"},
-//  "bq": {"html": "&#9819;","codepoint":"\u265B"},
-//  "br": {"html": "&#9820;","codepoint":"\u265C"},
-//  "bb": {"html": "&#9821;","codepoint":"\u265D"},
-//  "bn": {"html": "&#9822;","codepoint":"\u265E"},
-//  "bp": {"html": "&#9823;","codepoint":"\u265F"}}
 
 func init() {
-  fmt.Println("Inside init()")
+	fmt.Println("Inside init()")
 	rand.Seed(time.Now().UTC().UnixNano())
-  fmt.Println("pieces = ", pieces)
+	pieces = map[string]map[string]string{
+		"wk": map[string]string{"html": "&#9812;", "codepoint": "\u2654"},
+	}
+	//  "wq": {"html": "&#9813;","codepoint":"\u2655"},
+	//  "wr": {"html": "&#9814;","codepoint":"\u2656"},
+	//  "wb": {"html": "&#9815;","codepoint":"\u2657"},
+	//  "wn": {"html": "&#9816;","codepoint":"\u2658"},
+	//  "wp": {"html": "&#9817;","codepoint":"\u2659"},
+	//  "bk": {"html": "&#9818;","codepoint":"\u265A"},
+	//  "bq": {"html": "&#9819;","codepoint":"\u265B"},
+	//  "br": {"html": "&#9820;","codepoint":"\u265C"},
+	//  "bb": {"html": "&#9821;","codepoint":"\u265D"},
+	//  "bn": {"html": "&#9822;","codepoint":"\u265E"},
+	//  "bp": {"html": "&#9823;","codepoint":"\u265F"}}
+	fmt.Println("pieces = ", pieces)
 }
 
 type Board struct {
-  squares [8][8]string
-  white_legal_moves []string
-  black_legal_moves []string
+	squares           [8][8]string
+	white_legal_moves []string
+	black_legal_moves []string
 }
 
 func createBoard(board_json string) Board {
-  b := Board{squares:initBoard(board_json)}
-  fmt.Println("Default board is: ", b)
-  return b
+	b := Board{squares: initBoard(board_json)}
+	fmt.Println("Default board is: ", b)
+	return b
 }
 
 func randomColumn() string {
@@ -85,18 +86,18 @@ func numberToLetter(x int) string {
 
 func printBoard(board Board) {
 	for i := 0; i < 8; i++ {
-    var row string
+		var row string
 		for j := 0; j < 8; j++ {
-      if board.squares[i][j] == "0" {
-          row = "\u3000"
-      } else {
-          row = "asdf" //pieceToUnicode(board[i][j])
-      }
+			if board.squares[i][j] == "0" {
+				row = "\u3000"
+			} else {
+				row = "asdf" //pieceToUnicode(board[i][j])
+			}
 		}
-    fmt.Println(row)
+		fmt.Println(row)
 	}
 }
 
-func pieceToUnicode(piece string) string{
-  return "blahhh"
+func pieceToUnicode(piece string) string {
+	return "blahhh"
 }
