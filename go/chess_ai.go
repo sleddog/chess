@@ -8,8 +8,37 @@ import (
 	"time"
 )
 
+var pieces = make(map[string]map[string]string)
+//pieces = {
+//  "wk": {"html": "&#9812;","codepoint":"\u2654"},
+//  "wq": {"html": "&#9813;","codepoint":"\u2655"},
+//  "wr": {"html": "&#9814;","codepoint":"\u2656"},
+//  "wb": {"html": "&#9815;","codepoint":"\u2657"},
+//  "wn": {"html": "&#9816;","codepoint":"\u2658"},
+//  "wp": {"html": "&#9817;","codepoint":"\u2659"},
+//  "bk": {"html": "&#9818;","codepoint":"\u265A"},
+//  "bq": {"html": "&#9819;","codepoint":"\u265B"},
+//  "br": {"html": "&#9820;","codepoint":"\u265C"},
+//  "bb": {"html": "&#9821;","codepoint":"\u265D"},
+//  "bn": {"html": "&#9822;","codepoint":"\u265E"},
+//  "bp": {"html": "&#9823;","codepoint":"\u265F"}}
+
 func init() {
+  fmt.Println("Inside init()")
 	rand.Seed(time.Now().UTC().UnixNano())
+  fmt.Println("pieces = ", pieces)
+}
+
+type Board struct {
+  squares [8][8]string
+  white_legal_moves []string
+  black_legal_moves []string
+}
+
+func createBoard(board_json string) Board {
+  b := Board{squares:initBoard(board_json)}
+  fmt.Println("Default board is: ", b)
+  return b
 }
 
 func randomColumn() string {
@@ -29,7 +58,7 @@ func getNextMove() string {
 func initBoard(board_json string) [8][8]string {
 	//convert json to string map
 	byt := []byte(board_json)
-	var dat map[string]interface{}
+	var dat map[string]string
 	if err := json.Unmarshal(byt, &dat); err != nil {
 		panic(err)
 	}
@@ -39,7 +68,7 @@ func initBoard(board_json string) [8][8]string {
 		for j := 0; j < 8; j++ {
 			letter := numberToLetter(j)
 			square := letter + strconv.Itoa(i+1)
-			if val, ok := dat[square].(string); ok {
+			if val, ok := dat[square]; ok {
 				board[i][j] = val
 			} else {
 				board[i][j] = "0"
@@ -52,4 +81,22 @@ func initBoard(board_json string) [8][8]string {
 func numberToLetter(x int) string {
 	letters := []string{"a", "b", "c", "d", "e", "f", "g", "h"}
 	return letters[x]
+}
+
+func printBoard(board Board) {
+	for i := 0; i < 8; i++ {
+    var row string
+		for j := 0; j < 8; j++ {
+      if board.squares[i][j] == "0" {
+          row = "\u3000"
+      } else {
+          row = "asdf" //pieceToUnicode(board[i][j])
+      }
+		}
+    fmt.Println(row)
+	}
+}
+
+func pieceToUnicode(piece string) string{
+  return "blahhh"
 }
