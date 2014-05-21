@@ -123,8 +123,8 @@ func getLegalBlackMoves(node ChessNode) []string {
 				continue
 			} else if piece[0:1] == "b" {
 				//found a black piece
-				fmt.Println("black piece = ", piece)
-				black_moves = append(black_moves, getMovesForPiece(piece, node)...)
+				fmt.Println("black piece = ", piece, ", i=", i, "j=", j)
+				black_moves = append(black_moves, getMovesForBlackPiece(piece, i, j, node)...)
 			}
 		}
 	}
@@ -132,15 +132,28 @@ func getLegalBlackMoves(node ChessNode) []string {
 	return black_moves
 }
 
-func getMovesForPiece(piece string, node ChessNode) []string {
+func getMovesForBlackPiece(piece string, i int, j int, node ChessNode) []string {
 	var moves []string
 	piece_type := piece[1:2]
 	switch piece_type {
 	case "p":
 		fmt.Println("PAWN")
-		moves = append(moves, piece)
+		moves = append(moves, getMovesForBlackPawn(i, j, node)...)
 	default:
 		fmt.Println("DEFAULT = ", piece)
 	}
 	return moves
+}
+
+func getMovesForBlackPawn(i int, j int, node ChessNode) []string {
+	var moves []string
+	//TODO check if first square in front is blank
+	if i > 0 && node.board[i-1][j] == "0" {
+		moves = append(moves, coordToSquare(i, j))
+	}
+	return moves
+}
+
+func coordToSquare(i int, j int) string {
+	return "TODO"
 }
