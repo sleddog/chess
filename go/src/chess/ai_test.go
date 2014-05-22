@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetNextMove(t *testing.T) {
-	move := getNextMove()
+	move := GetNextMove()
 	fmt.Println(move)
 }
 

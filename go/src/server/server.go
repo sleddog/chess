@@ -1,7 +1,8 @@
-package chess
+package main
 
 import (
-	"fmt"
+    "chess"
+    "fmt"
 	"net/http"
 	"net/http/cgi"
 )
@@ -10,7 +11,7 @@ func randomMove(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Content-type: text/json\n\n")
 	fmt.Fprintf(w, "{")
 	fmt.Fprintf(w, "\"query\":\"", r.RequestURI, "\",")
-	fmt.Fprintf(w, getNextMove())
+	fmt.Fprintf(w, chess.GetNextMove())
 	fmt.Fprintf(w, "}\n")
 }
 

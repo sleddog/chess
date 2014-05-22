@@ -1,3 +1,5 @@
 cd ~/public_html/chess/go
-go build -o ../../cgi-bin/chess_go_ai.cgi server.go chess_ai.go
+#produces a server binary file in the ./go/bin directory
+go install server
+#TODO create a symlink of ./go/bin/server to ~/public_html/cgi-bin/chess_go_ai.cgi
 cd -

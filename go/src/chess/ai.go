@@ -63,7 +63,7 @@ func randomColumn() string {
 	return string(columns[rand.Intn(len(columns))])
 }
 
-func getNextMove() string {
+func GetNextMove() string {
 	var move string
 	var randChar string
 	randChar = randomColumn()
