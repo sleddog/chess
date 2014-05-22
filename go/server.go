@@ -9,7 +9,7 @@ import (
 func randomMove(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Content-type: text/json\n\n")
 	fmt.Fprintf(w, "{")
-	fmt.Fprintf(w, "\"query\":\"blahhh\",")
+	fmt.Fprintf(w, "\"query\":\"", r.RequestURI, "\",")
 	fmt.Fprintf(w, getNextMove())
 	fmt.Fprintf(w, "}\n")
 }
