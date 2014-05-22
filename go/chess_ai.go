@@ -41,12 +41,19 @@ func init() {
 //struct to hold all data about a particular board
 type ChessNode struct {
 	board             [8][8]string
-	white_legal_moves []string
-	black_legal_moves []string
+	white_legal_moves []Move
+	black_legal_moves []Move
+}
+
+type Move struct {
+	row   int
+	col   int
+	piece string
 }
 
 func createChessNode(board_json string) ChessNode {
 	node := ChessNode{board: createBoard(board_json)}
+	node.black_legal_moves = getLegalBlackMoves(node)
 	return node
 }
 
@@ -74,14 +81,14 @@ func createBoard(board_json string) [8][8]string {
 	}
 	//populate board matrix
 	var board [8][8]string
-	for i := 0; i < 8; i++ {
-		for j := 0; j < 8; j++ {
-			letter := numberToLetter(j)
-			square := letter + strconv.Itoa(i+1)
+	for row := 0; row < 8; row++ {
+		for col := 0; col < 8; col++ {
+			letter := numberToLetter(col)
+			square := letter + strconv.Itoa(row+1)
 			if val, ok := dat[square]; ok {
-				board[i][j] = val
+				board[row][col] = val
 			} else {
-				board[i][j] = "0"
+				board[row][col] = "0"
 			}
 		}
 	}
@@ -95,16 +102,16 @@ func numberToLetter(x int) string {
 
 func printNode(node ChessNode) {
 	board := node.board
-	for i := 7; i >= 0; i-- {
-		row := ""
-		for j := 0; j < 8; j++ {
-			if board[i][j] == "0" {
-				row += "\u3000"
+	for row := 7; row >= 0; row-- {
+		output := ""
+		for col := 0; col < 8; col++ {
+			if board[row][col] == "0" {
+				output += "\u3000"
 			} else {
-				row += pieceToUnicode(board[i][j])
+				output += pieceToUnicode(board[row][col])
 			}
 		}
-		fmt.Println(row)
+		fmt.Println(output)
 	}
 }
 
@@ -113,18 +120,18 @@ func pieceToUnicode(piece string) string {
 }
 
 //for the given ChessNode return all of the legal black moves
-func getLegalBlackMoves(node ChessNode) []string {
-	var black_moves []string
+func getLegalBlackMoves(node ChessNode) []Move {
+	var black_moves []Move
 	board := node.board
-	for i := 7; i >= 0; i-- {
-		for j := 0; j < 8; j++ {
-			piece := board[i][j]
+	for row := 7; row >= 0; row-- {
+		for col := 0; col < 8; col++ {
+			piece := board[row][col]
 			if piece == "0" {
 				continue
 			} else if piece[0:1] == "b" {
 				//found a black piece
-				fmt.Println("black piece = ", piece, ", i=", i, "j=", j)
-				black_moves = append(black_moves, getMovesForBlackPiece(piece, i, j, node)...)
+				fmt.Println("black piece = ", piece, ", row=", row, "col=", col)
+				black_moves = append(black_moves, getMovesForBlackPiece(piece, row, col, node)...)
 			}
 		}
 	}
@@ -132,28 +139,50 @@ func getLegalBlackMoves(node ChessNode) []string {
 	return black_moves
 }
 
-func getMovesForBlackPiece(piece string, i int, j int, node ChessNode) []string {
-	var moves []string
+func getMovesForBlackPiece(piece string, row int, col int, node ChessNode) []Move {
+	var moves []Move
 	piece_type := piece[1:2]
 	switch piece_type {
 	case "p":
 		fmt.Println("PAWN")
-		moves = append(moves, getMovesForBlackPawn(i, j, node)...)
+		moves = append(moves, getMovesForBlackPawn(piece, row, col, node)...)
 	default:
 		fmt.Println("DEFAULT = ", piece)
 	}
 	return moves
 }
 
-func getMovesForBlackPawn(i int, j int, node ChessNode) []string {
-	var moves []string
-	//TODO check if first square in front is blank
-	if i > 0 && node.board[i-1][j] == "0" {
-		moves = append(moves, coordToSquare(i, j))
+func getMovesForBlackPawn(piece string, row int, col int, node ChessNode) []Move {
+	var moves []Move
+
+	//check if first square in front is blank
+	if row > 0 && node.board[row-1][col] == "0" {
+		moves = append(moves, Move{row: row - 1, col: col, piece: piece})
+
+		//check 2 moves in front if on the initial row (6th for black)
+		if row == 6 && node.board[row-2][col] == "0" {
+			//check 2 moves in front
+			moves = append(moves, Move{row: row - 2, col: col, piece: piece})
+		}
+	}
+
+	//can you attack diagonally to the right?
+	if col > 0 && row > 0 {
+		attackSquare := node.board[row-1][col-1]
+		if attackSquare != "0" && attackSquare[0:1] == "w" {
+			moves = append(moves, Move{row: row - 1, col: col - 1, piece: piece})
+		}
+	}
+	//can you attack diagonally to the left?
+	if col < 7 && row > 0 {
+		attackSquare := node.board[row-1][col+1]
+		if attackSquare != "0" && attackSquare[0:1] == "w" {
+			moves = append(moves, Move{row: row - 1, col: col + 1, piece: piece})
+		}
 	}
 	return moves
 }
 
-func coordToSquare(i int, j int) string {
+func coordToSquare(row int, col int) string {
 	return "TODO"
 }
