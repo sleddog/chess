@@ -13,7 +13,7 @@ var pieces = make(map[string]map[string]string)
 var initial_board_json string
 
 func init() {
-	fmt.Println("Inside init()")
+	//fmt.Println("Inside init()")
 
 	//set the random seed
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -32,7 +32,7 @@ func init() {
 		"bb": {"html": "&#9821;", "codepoint": "\u265D"},
 		"bn": {"html": "&#9822;", "codepoint": "\u265E"},
 		"bp": {"html": "&#9823;", "codepoint": "\u265F"}}
-	fmt.Println("pieces = ", pieces)
+	//fmt.Println("pieces = ", pieces)
 
 	//set the initial_board_json
 	initial_board_json = "{\"a8\":\"br\",\"b8\":\"bn\",\"c8\":\"bb\",\"d8\":\"bq\",\"e8\":\"bk\",\"f8\":\"bb\",\"g8\":\"bn\",\"h8\":\"br\",\"a7\":\"bp\",\"b7\":\"bp\",\"c7\":\"bp\",\"d7\":\"bp\",\"e7\":\"bp\",\"f7\":\"bp\",\"g7\":\"bp\",\"h7\":\"bp\",\"a2\":\"wp\",\"b2\":\"wp\",\"c2\":\"wp\",\"d2\":\"wp\",\"e2\":\"wp\",\"f2\":\"wp\",\"g2\":\"wp\",\"h2\":\"wp\",\"a1\":\"wr\",\"b1\":\"wn\",\"c1\":\"wb\",\"d1\":\"wq\",\"e1\":\"wk\",\"f1\":\"wb\",\"g1\":\"wn\",\"h1\":\"wr\"}"
@@ -130,12 +130,12 @@ func getLegalBlackMoves(node ChessNode) []Move {
 				continue
 			} else if piece[0:1] == "b" {
 				//found a black piece
-				fmt.Println("black piece = ", piece, ", row=", row, "col=", col)
+				//fmt.Println("black piece = ", piece, ", row=", row, "col=", col)
 				black_moves = append(black_moves, getMovesForBlackPiece(piece, row, col, node)...)
 			}
 		}
 	}
-	fmt.Println("# of legal black_moves = ", len(black_moves))
+	//fmt.Println("# of legal black_moves = ", len(black_moves))
 	return black_moves
 }
 
@@ -144,10 +144,10 @@ func getMovesForBlackPiece(piece string, row int, col int, node ChessNode) []Mov
 	piece_type := piece[1:2]
 	switch piece_type {
 	case "p":
-		fmt.Println("PAWN")
+		//fmt.Println("PAWN")
 		moves = append(moves, getMovesForBlackPawn(piece, row, col, node)...)
 	default:
-		fmt.Println("DEFAULT = ", piece)
+		//fmt.Println("DEFAULT = ", piece)
 	}
 	return moves
 }
