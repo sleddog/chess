@@ -46,9 +46,19 @@ type ChessNode struct {
 }
 
 type Move struct {
-	row   int
-	col   int
-	piece string
+	orig_row int
+	orig_col int
+	dest_row int
+	dest_col int
+	piece    string
+}
+
+func formatNextMove(move Move) string {
+	columns := "abcdefgh"
+	fromSquare := string(columns[move.orig_col]) + strconv.Itoa(move.orig_row+1)
+	toSquare := string(columns[move.dest_col]) + strconv.Itoa(move.dest_row+1)
+	nextMove := fmt.Sprintf("\"next-move\":\"%s-%s\"", fromSquare, toSquare)
+	return nextMove
 }
 
 func createChessNode(board_json string) ChessNode {
@@ -65,9 +75,19 @@ func randomColumn() string {
 
 func GetNextMove() string {
 	var move string
-	var randChar string
-	randChar = randomColumn()
-	move = fmt.Sprintf("\"next-move\":\"%s7-%s5\"", randChar, randChar)
+
+	//prototype #1 - choose a random initial pawn and move 2 places
+	//var randChar string
+	//randChar = randomColumn()
+	//move = fmt.Sprintf("\"next-move\":\"%s7-%s5\"", randChar, randChar)
+
+	//prototype #2 - calculate legal black moves and randomly choose a move
+	//TODO pass in the board properly... currently a []string, needed to be just a string
+	//node := createChessNode(board_json)
+	node := createChessNode(initial_board_json)
+	randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
+	move = formatNextMove(randMove)
+
 	return move
 }
 
@@ -157,12 +177,12 @@ func getMovesForBlackPawn(piece string, row int, col int, node ChessNode) []Move
 
 	//check if first square in front is blank
 	if row > 0 && node.board[row-1][col] == "0" {
-		moves = append(moves, Move{row: row - 1, col: col, piece: piece})
+		moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 1, dest_col: col, piece: piece})
 
 		//check 2 moves in front if on the initial row (6th for black)
 		if row == 6 && node.board[row-2][col] == "0" {
 			//check 2 moves in front
-			moves = append(moves, Move{row: row - 2, col: col, piece: piece})
+			moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 2, dest_col: col, piece: piece})
 		}
 	}
 
@@ -170,19 +190,15 @@ func getMovesForBlackPawn(piece string, row int, col int, node ChessNode) []Move
 	if col > 0 && row > 0 {
 		attackSquare := node.board[row-1][col-1]
 		if attackSquare != "0" && attackSquare[0:1] == "w" {
-			moves = append(moves, Move{row: row - 1, col: col - 1, piece: piece})
+			moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 1, dest_col: col - 1, piece: piece})
 		}
 	}
 	//can you attack diagonally to the left?
 	if col < 7 && row > 0 {
 		attackSquare := node.board[row-1][col+1]
 		if attackSquare != "0" && attackSquare[0:1] == "w" {
-			moves = append(moves, Move{row: row - 1, col: col + 1, piece: piece})
+			moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 1, dest_col: col + 1, piece: piece})
 		}
 	}
 	return moves
-}
-
-func coordToSquare(row int, col int) string {
-	return "TODO"
 }
