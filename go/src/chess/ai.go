@@ -67,6 +67,18 @@ func createChessNode(board_json string) ChessNode {
 	return node
 }
 
+func createChessNodeUsingMap(dat map[string]string) ChessNode {
+	node := ChessNode{board: createBoardUsingMap(dat)}
+	node.black_legal_moves = getLegalBlackMoves(node)
+	return node
+}
+
+func createChessNodeUsingArray(dat []string) ChessNode {
+	node := ChessNode{board: createBoardUsingArray(dat)}
+	node.black_legal_moves = getLegalBlackMoves(node)
+	return node
+}
+
 func randomColumn() string {
 	var columns string
 	columns = "abcdefgh"
@@ -83,7 +95,7 @@ func GetNextMove() string {
 
 	//prototype #2 - calculate legal black moves and randomly choose a move
 	//TODO pass in the board properly... currently a []string, needed to be just a string
-	//node := createChessNode(board_json)
+	//node := createChessNodeUsingMap(board)
 	node := createChessNode(initial_board_json)
 	randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
 	move = formatNextMove(randMove)
@@ -91,14 +103,40 @@ func GetNextMove() string {
 	return move
 }
 
-//return an 8x8 board from the JSON representation
-func createBoard(board_json string) [8][8]string {
-	//convert json to string map
-	byt := []byte(board_json)
-	var dat map[string]string
-	if err := json.Unmarshal(byt, &dat); err != nil {
-		panic(err)
+func GetNextMoveUsingJson(board string) string {
+	var move string
+
+	//prototype #1 - choose a random initial pawn and move 2 places
+	//var randChar string
+	//randChar = randomColumn()
+	//move = fmt.Sprintf("\"next-move\":\"%s7-%s5\"", randChar, randChar)
+
+	//prototype #2 - calculate legal black moves and randomly choose a move
+	//TODO pass in the board properly... currently a []string, needed to be just a string
+	//node := createChessNodeUsingArray(board)
+	fmt.Println("board=", board)
+	node := createChessNode(board)
+	fmt.Println("node=", board)
+	randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
+	move = formatNextMove(randMove)
+
+	return move
+}
+
+func createBoardUsingArray(dat []string) [8][8]string {
+	//populate board matrix
+	var board [8][8]string
+	for row := 0; row < 8; row++ {
+		for col := 0; col < 8; col++ {
+			//letter := numberToLetter(col)
+			//square := letter + strconv.Itoa(row+1)
+			board[row][col] = dat[row]
+		}
 	}
+	return board
+}
+
+func createBoardUsingMap(dat map[string]string) [8][8]string {
 	//populate board matrix
 	var board [8][8]string
 	for row := 0; row < 8; row++ {
@@ -113,6 +151,22 @@ func createBoard(board_json string) [8][8]string {
 		}
 	}
 	return board
+}
+
+func convertJsonToMap(board_json string) map[string]string {
+	//convert json to string map
+	byt := []byte(board_json)
+	var dat map[string]string
+	if err := json.Unmarshal(byt, &dat); err != nil {
+		panic(err)
+	}
+	return dat
+}
+
+//return an 8x8 board from the JSON representation
+func createBoard(board_json string) [8][8]string {
+	dat := convertJsonToMap(board_json)
+	return createBoardUsingMap(dat)
 }
 
 func numberToLetter(x int) string {
