@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -75,6 +76,7 @@ func createChessNodeUsingMap(dat map[string]string) ChessNode {
 
 func createChessNodeUsingArray(dat []string) ChessNode {
 	node := ChessNode{board: createBoardUsingArray(dat)}
+	fmt.Println("node=", node)
 	node.black_legal_moves = getLegalBlackMoves(node)
 	return node
 }
@@ -85,52 +87,53 @@ func randomColumn() string {
 	return string(columns[rand.Intn(len(columns))])
 }
 
+//prototype #1 - choose a random initial pawn and move 2 places
 func GetNextMove() string {
 	var move string
 
-	//prototype #1 - choose a random initial pawn and move 2 places
-	//var randChar string
-	//randChar = randomColumn()
-	//move = fmt.Sprintf("\"next-move\":\"%s7-%s5\"", randChar, randChar)
-
-	//prototype #2 - calculate legal black moves and randomly choose a move
-	//TODO pass in the board properly... currently a []string, needed to be just a string
-	//node := createChessNodeUsingMap(board)
-	node := createChessNode(initial_board_json)
-	randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
-	move = formatNextMove(randMove)
-
+	var randChar string
+	randChar = randomColumn()
+	move = fmt.Sprintf("\"next-move\":\"%s7-%s5\"", randChar, randChar)
 	return move
 }
 
-func GetNextMoveUsingJson(board string) string {
+//prototype #2 - calculate legal black moves and randomly choose a move
+func GetNextMoveUsingArray(dat []string) string {
 	var move string
 
-	//prototype #1 - choose a random initial pawn and move 2 places
-	//var randChar string
-	//randChar = randomColumn()
-	//move = fmt.Sprintf("\"next-move\":\"%s7-%s5\"", randChar, randChar)
-
-	//prototype #2 - calculate legal black moves and randomly choose a move
-	//TODO pass in the board properly... currently a []string, needed to be just a string
-	//node := createChessNodeUsingArray(board)
-	fmt.Println("board=", board)
-	node := createChessNode(board)
-	fmt.Println("node=", board)
-	randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
-	move = formatNextMove(randMove)
+	node := createChessNodeUsingArray(dat)
+	//printNode(node)
+	if len(node.black_legal_moves) > 0 {
+		randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
+		move = formatNextMove(randMove)
+	}
 
 	return move
 }
 
 func createBoardUsingArray(dat []string) [8][8]string {
-	//populate board matrix
+	boardStr := dat[0] //should be first element in array
+	boardLen := len(boardStr)
+
+	//split on the '],'
+	arr := strings.Split(boardStr[1:boardLen-1], "],")
 	var board [8][8]string
-	for row := 0; row < 8; row++ {
-		for col := 0; col < 8; col++ {
-			//letter := numberToLetter(col)
-			//square := letter + strconv.Itoa(row+1)
-			board[row][col] = dat[row]
+	for i := 0; i < len(arr); i++ {
+		row := arr[i][1:len(arr[i])] //remove the leading '['
+		if i == 7 {                  //remove the trailing ']' on last row
+			row = row[0 : len(row)-1]
+		}
+		//now split on the ','
+		rowArr := strings.Split(row, ",")
+
+		//finally populate matrix
+		for j := 0; j < len(rowArr); j++ {
+			if rowArr[j] == "0" {
+				board[i][j] = rowArr[j]
+			} else {
+				//piece exists...strip off double quotes "xx"
+				board[i][j] = rowArr[j][1:3]
+			}
 		}
 	}
 	return board
@@ -200,6 +203,7 @@ func getLegalBlackMoves(node ChessNode) []Move {
 	for row := 7; row >= 0; row-- {
 		for col := 0; col < 8; col++ {
 			piece := board[row][col]
+			//fmt.Println("piece=", piece)
 			if piece == "0" {
 				continue
 			} else if piece[0:1] == "b" {

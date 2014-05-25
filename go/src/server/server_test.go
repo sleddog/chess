@@ -1,15 +1,11 @@
 package main
 
 import (
-  "fmt"
-  "testing"
+	"fmt"
+	"testing"
 )
 
 func TestMain(t *testing.T) {
-  fmt.Println("TestMain")
-  main()
-}
-
-func TestGetNextMove(t *testing.T) {
-  fmt.Println(getNextMove())
+	fmt.Println("TestMain")
+	main()
 }
