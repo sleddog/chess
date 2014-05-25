@@ -293,6 +293,61 @@ function enable_submit_move() {
     document.getElementById('piece_to').value = targetSquare;
 }
 
+// build a string representing the move in algebraic notation
+// http://en.wikipedia.org/wiki/Algebraic_notation_(chess)
+// example game:  1. e4 c5 2. Nf3 d6 3. Bb5+ Bd7 4. Bxd7+ Qxd7 5. c4 Nc6 6. Nc3 Nf6 7. 0-0 g6 8. d4 cxd4 9. Nxd4 Bg7 10. Nde2 Qe6!? (a novelty suggested by Irina Krush and considered a turning point for the World Team) 11. Nd5 Qxe4 12. Nc7+ Kd7 13. Nxa8 Qxc4 14. Nb6+ axb6 15. Nc3 Ra8 16. a4 Ne4 17. Nxe4 Qxe4 18. Qb3 f5 19. Bg5 Qb4 20. Qf7 Be5 21. h3 Rxa4 22. Rxa4 Qxa4 23. Qxh7 Bxb2 24. Qxg6 Qe4 25. Qf7 Bd4 26. Qb3 f4 27. Qf7 Be5 28. h4 b5 29. h5 Qc4 30. Qf5+ Qe6 31. Qxe6+ Kxe6 (see diagram) 32. g3 fxg3 33. fxg3 b4 (the World Team did not trust 33...Bxg3 34.h6 Be5 35.h7 Bg7 36.Rf8 b4 37.h8=Q Bxh8 38.Rxh8) 34. Bf4 Bd4+ 35. Kh1! b3 36. g4 Kd5 37. g5 e6 38. h6 Ne7 39. Rd1 e5 40. Be3 Kc4 41. Bxd4 exd4 42. Kg2 b2 43. Kf3 Kc3 44. h7 Ng6 45. Ke4 Kc2 46. Rh1 d3 (46...b1=Q? 47.Rxb1 Kxb1 48.Kxd4 and White will win) 47. Kf5 b1=Q 48. Rxb1 Kxb1 49. Kxg6 d2 50. h8=Q d1=Q 51. Qh7 b5?! 52. Kf6+ Kb2 53. Qh2+ Ka1 54. Qf4 b4? 55. Qxb4 Qf3+ 56. Kg7 d5 57. Qd4+ Kb1 58. g6 Qe4 59. Qg1+ Kb2 60. Qf2+ Kc1 61. Kf6 d4 62. g7 1–0
+function format_move(next_move) 
+{
+    //split next_move into individual squares
+    var moves = next_move.split('-');
+    from = moves[0];
+    to = moves[1];
+
+    //determine what piece type
+    var old_coord = square_to_coord(from);
+    var fromPiece = board[old_coord[0]][old_coord[1]];
+    pieceType = fromPiece.substring(1,2);
+
+    //determine if this is an attack
+    var new_coord = square_to_coord(to);
+    var targetPiece = board[new_coord[0]][new_coord[1]];
+    var attack = (targetPiece == "0") ? false : true;
+
+    var formattedMove = "";
+    switch(pieceType) {
+        case 'p':
+            if(attack) {
+                formattedMove = from.substring(0,1); //grab only the column (a-h) to indicate pawn
+            }
+            break;
+        case 'n':
+            formattedMove = 'N'
+            break;
+        case 'b':
+            formattedMove = 'B'
+            break;
+        case 'r':
+            //TODO add castling moves '0-0' and '0-0-0'
+            formattedMove = 'R'
+            break;
+        case 'q':
+            formattedMove = 'Q'
+            break;
+        case 'k':
+            formattedMove = 'K'
+            break;
+        default:
+            console.log('default case');
+            console.log(type);
+            break;
+    }
+    if(attack) {
+        formattedMove += "x";
+    }
+    formattedMove += to;
+    return formattedMove;
+}
+
 function submit_move() {
     //validate one last time...
     if(selectedSquare == 0 || targetSquare == 0) {
@@ -300,6 +355,7 @@ function submit_move() {
         return;
     }
     var selectedMove = selectedSquare + '-' + targetSquare;
+    var formattedMove = format_move(selectedMove);
 
     //move the piece
     move_pieces(selectedSquare, targetSquare);
@@ -308,7 +364,7 @@ function submit_move() {
     reset_initial_square();
 
     //update the history
-    update_history('white', selectedMove);
+    update_history('white', selectedMove, formattedMove);
 
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
@@ -345,9 +401,10 @@ function make_move(next_move) {
     var old_coord = square_to_coord(moves[0]);
     var piece = board[old_coord[0]][old_coord[1]];
     if(piece && piece.substring(0,1) == 'b') {
+        var formattedMove = format_move(next_move);
         move_pieces(moves[0], moves[1]);
         //update the history
-        update_history('black', next_move);
+        update_history('black', next_move, formattedMove);
     }
 }
 
@@ -586,7 +643,7 @@ function clear_legal_moves() {
     legal_moves = [];
 }
 
-function update_history(player, move)
+function update_history(player, move, formattedMove)
 {
     var table = document.getElementById('move_history_table');
     if(!table) {
@@ -600,12 +657,12 @@ function update_history(player, move)
         var moveNumber = row.insertCell(0);
         moveNumber.innerHTML = rowCount;
         var white = row.insertCell(1);
-        white.innerHTML = move;
+        white.innerHTML = formattedMove;
     }
     else { // black
         var row = table.rows[rowCount-1];
         var black = row.insertCell(2);
-        black.innerHTML = move;
+        black.innerHTML = formattedMove;
     }
 
     //update the history array with this move
