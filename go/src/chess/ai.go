@@ -76,7 +76,6 @@ func createChessNodeUsingMap(dat map[string]string) ChessNode {
 
 func createChessNodeUsingArray(dat []string) ChessNode {
 	node := ChessNode{board: createBoardUsingArray(dat)}
-	fmt.Println("node=", node)
 	node.black_legal_moves = getLegalBlackMoves(node)
 	return node
 }
