@@ -148,6 +148,7 @@ var board = null;
 var num_to_letter = ['a','b','c','d','e','f','g','h'];
 var pieces = JSON.parse('<?=json_encode($pieces); ?>');
 var history = [];
+var highlighted_move;
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -668,6 +669,27 @@ function update_history(player, move, formattedMove)
     //update the history array with this move
     history.push([player, move]);
     //console.log(history);
+
+    //highlight what squares did the move    
+    set_highlighted_move(move)
+
+}
+
+function clear_highlighted_move() {
+    if(!highlighted_move) {
+        return;
+    }
+    var squares = highlighted_move.split('-');
+    document.getElementById(squares[0]).style.border = 'none';
+    document.getElementById(squares[1]).style.border = 'none';
+}
+
+function set_highlighted_move(move) {
+    clear_highlighted_move()
+    highlighted_move = move;
+    var squares = highlighted_move.split('-');
+    document.getElementById(squares[0]).style.border = '#666666 solid 3px';
+    document.getElementById(squares[1]).style.border = '#999999 solid 3px';
 }
 
 //onload
