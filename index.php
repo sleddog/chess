@@ -233,19 +233,12 @@ function square_select(button) {
         if(selectedSquare == button.id) {
             reset_initial_square();
             if(targetSquare != 0) {
-                document.getElementById(targetSquare).style.backgroundColor = square_to_color(targetSquare);
+                document.getElementById(targetSquare).style.border = 'none';
             }
         }
         else { //set target
             if(targetSquare != 0) {
-                //if square was a previous legal move use highlight color
-                if(legal_moves.indexOf(targetSquare) > -1) {
-                    resetColor = "lightyellow";
-                }
-                else {
-                    resetColor = square_to_color(targetSquare);
-                }
-                document.getElementById(targetSquare).style.backgroundColor = resetColor;
+                document.getElementById(targetSquare).style.border = 'none';
             }
             //if they select another piece, restart selection
             if(value != 0) {
@@ -263,7 +256,7 @@ function square_select(button) {
                     return;
                 }
                 else {
-                    button.style.backgroundColor = "lightpink";
+                    button.style.border = "darkred solid 4px";
                     targetSquare = button.id;
                     enable_submit_move();
                 }
@@ -277,7 +270,7 @@ function square_select(button) {
 
 function reset_initial_square() {
     clear_legal_moves();
-    document.getElementById(selectedSquare).style.backgroundColor = square_to_color(selectedSquare);
+    document.getElementById(selectedSquare).style.border = 'none';
     selectedSquare = 0;
     document.getElementById('piece_from').value = '';
     reset_target_square();
@@ -425,19 +418,15 @@ function move_pieces(from, to) {
 function highlight_initial_move(button) {
     clear_legal_moves();
     selectedSquare = button.id;
-    button.style.backgroundColor = "lightgreen";
+    button.style.border = "darkblue solid 4px";
     highlight_legal_moves(selectedSquare);
     document.getElementById('piece_from').value = selectedSquare;
 }
 
 function highlight_legal_moves(selectedSquare) {
     //inspect the board, and determine what the legal moves are
-    //console.log(selectedSquare);
     var coord = square_to_coord(selectedSquare);
-    //console.log(coord);
-    //console.log(board);
     var piece = board[coord[0]][coord[1]];
-    //console.log(piece);
     var color = piece.substring(0,1);
     var type = piece.substring(1,2);
     switch(type) {
@@ -629,10 +618,15 @@ function legal_king_moves(coord, color) {
     }
 }
 
+function legal_move_color(square) {
+    var color = square_to_color(square);
+    return (color == 'white') ? "#FFFF99" : "#999966";
+}
+
 //highlight the legal move on the board for this coord and track in global array
 function add_legal_move(coord) {
     var square = coord_to_square(coord);
-    document.getElementById(square).style.backgroundColor = 'lightyellow';
+    document.getElementById(square).style.backgroundColor = legal_move_color(square);
     legal_moves.push(square);
 }
 
@@ -668,7 +662,6 @@ function update_history(player, move, formattedMove)
 
     //update the history array with this move
     history.push([player, move]);
-    //console.log(history);
 
     //highlight what squares did the move    
     set_highlighted_move(move)
