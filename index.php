@@ -138,6 +138,9 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 </table>
 </td>
 </tr></table>
+<hr />
+<a href='http://en.wikipedia.org/wiki/Forsyth-Edwards_Notation'>FEN record</a> (experimental)<br />
+<input type='text' class='input-lg' style='width:650px' id='fen' name='fen' value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" />
 </div>
 
 <script>
