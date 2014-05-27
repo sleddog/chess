@@ -232,14 +232,8 @@ function square_select(button) {
         //are they unselecting the first square?
         if(selectedSquare == button.id) {
             reset_initial_square();
-            if(targetSquare != 0) {
-                document.getElementById(targetSquare).style.border = 'none';
-            }
         }
         else { //set target
-            if(targetSquare != 0) {
-                document.getElementById(targetSquare).style.border = 'none';
-            }
             //if they select another piece, restart selection
             if(value != 0) {
                 if(value.substring(0,1) == 'w') {
@@ -248,21 +242,13 @@ function square_select(button) {
                     return;
                 }
             }
-            //make sure they are selecting legal moves
-            if(legal_moves.indexOf(button.id) > -1) {
-                //reset if they pick the same exact target
-                if(targetSquare == button.id) {
-                    reset_target_square();
-                    return;
-                }
-                else {
-                    button.style.border = "darkred solid 4px";
-                    targetSquare = button.id;
-                    enable_submit_move();
-                }
-            }
-            else {
-                reset_target_square();
+            //make sure they are selecting legal moves AND a different target
+            setTarget = (legal_moves.indexOf(button.id) > -1) && (targetSquare != button.id);
+            reset_target_square();
+            if(setTarget) {
+                button.style.border = "darkred solid 4px";
+                targetSquare = button.id;
+                enable_submit_move();
             }
         }
     }
@@ -277,6 +263,9 @@ function reset_initial_square() {
 }
 
 function reset_target_square() {
+    if(targetSquare != 0) {
+        document.getElementById(targetSquare).style.border = 'none';
+    }
     targetSquare = 0;
     document.getElementById('piece_to').value = '';
     document.getElementById('submit_move_button').disabled = true;
