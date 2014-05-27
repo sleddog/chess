@@ -136,11 +136,12 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <table id='move_history_table' width='180'>
 <tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
 </table>
+<br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
 </td>
 </tr></table>
 <hr />
 <a href='http://en.wikipedia.org/wiki/Forsyth-Edwards_Notation'>FEN record</a> (experimental)<br />
-<input type='text' class='input-lg' style='width:650px' id='fen' name='fen' value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" />
+<input type='text' class='input-lg' style='width:700px' id='fen_record' name='fen_record' value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" />
 </div>
 
 <script>
@@ -152,6 +153,8 @@ var num_to_letter = ['a','b','c','d','e','f','g','h'];
 var pieces = JSON.parse('<?=json_encode($pieces); ?>');
 var history = [];
 var highlighted_move;
+var halfmove_clock = 0;
+var fullmove_number = 1;
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -275,13 +278,13 @@ function reset_target_square() {
 }
 
 function enable_submit_move() {
+    calculate_fen("b", selectedSquare, targetSquare);
     document.getElementById('submit_move_button').disabled = false;
     document.getElementById('piece_to').value = targetSquare;
 }
 
 // build a string representing the move in algebraic notation
 // http://en.wikipedia.org/wiki/Algebraic_notation_(chess)
-// example game:  1. e4 c5 2. Nf3 d6 3. Bb5+ Bd7 4. Bxd7+ Qxd7 5. c4 Nc6 6. Nc3 Nf6 7. 0-0 g6 8. d4 cxd4 9. Nxd4 Bg7 10. Nde2 Qe6!? (a novelty suggested by Irina Krush and considered a turning point for the World Team) 11. Nd5 Qxe4 12. Nc7+ Kd7 13. Nxa8 Qxc4 14. Nb6+ axb6 15. Nc3 Ra8 16. a4 Ne4 17. Nxe4 Qxe4 18. Qb3 f5 19. Bg5 Qb4 20. Qf7 Be5 21. h3 Rxa4 22. Rxa4 Qxa4 23. Qxh7 Bxb2 24. Qxg6 Qe4 25. Qf7 Bd4 26. Qb3 f4 27. Qf7 Be5 28. h4 b5 29. h5 Qc4 30. Qf5+ Qe6 31. Qxe6+ Kxe6 (see diagram) 32. g3 fxg3 33. fxg3 b4 (the World Team did not trust 33...Bxg3 34.h6 Be5 35.h7 Bg7 36.Rf8 b4 37.h8=Q Bxh8 38.Rxh8) 34. Bf4 Bd4+ 35. Kh1! b3 36. g4 Kd5 37. g5 e6 38. h6 Ne7 39. Rd1 e5 40. Be3 Kc4 41. Bxd4 exd4 42. Kg2 b2 43. Kf3 Kc3 44. h7 Ng6 45. Ke4 Kc2 46. Rh1 d3 (46...b1=Q? 47.Rxb1 Kxb1 48.Kxd4 and White will win) 47. Kf5 b1=Q 48. Rxb1 Kxb1 49. Kxg6 d2 50. h8=Q d1=Q 51. Qh7 b5?! 52. Kf6+ Kb2 53. Qh2+ Ka1 54. Qf4 b4? 55. Qxb4 Qf3+ 56. Kg7 d5 57. Qd4+ Kb1 58. g6 Qe4 59. Qg1+ Kb2 60. Qf2+ Kc1 61. Kf6 d4 62. g7 1–0
 function format_move(next_move) 
 {
     //split next_move into individual squares
@@ -388,6 +391,8 @@ function make_move(next_move) {
     var piece = board[old_coord[0]][old_coord[1]];
     if(piece && piece.substring(0,1) == 'b') {
         var formattedMove = format_move(next_move);
+        fullmove_number++;
+        calculate_fen("w", moves[0], moves[1]);
         move_pieces(moves[0], moves[1]);
         //update the history
         update_history('black', next_move, formattedMove);
@@ -657,7 +662,6 @@ function update_history(player, move, formattedMove)
 
     //highlight what squares did the move    
     set_highlighted_move(move)
-
 }
 
 function clear_highlighted_move() {
@@ -675,6 +679,120 @@ function set_highlighted_move(move) {
     var squares = highlighted_move.split('-');
     document.getElementById(squares[0]).style.border = '#666666 solid 3px';
     document.getElementById(squares[1]).style.border = '#999999 solid 3px';
+}
+
+//return a string representing the FEN record for the current board 
+//http://en.wikipedia.org/wiki/Forsyth-Edwards_Notation
+//example initial board:  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+function calculate_fen(active_color, from, to) {
+    //create a new local copy of the board and simulate the current move
+    var fen_board = create_fen_board(from, to);
+
+    //6 part string separated by spaces
+    var fen = ""; 
+
+    //1. Piece placement
+    fen += fen_piece_placement(fen_board) + " ";
+    //2. Active color. "w" means White moves next, "b" means Black.
+    fen += active_color + " ";
+    //3. Castling availability.
+    fen += fen_castling_availability(fen_board) + " ";
+    //4. En passant target square in algebraic notation
+    fen += fen_en_passant_target_square(from, to) + " ";
+    //5. Halfmove clock
+    fen += fen_halfmove_clock() + " ";
+    //6. Fullmove number
+    fen += fen_fullmove_number();
+
+    console.log(fen);
+    document.getElementById('fen_record').value = fen;
+}
+
+function create_fen_board(from, to) {
+    var fen_board = [];
+    for (var i = 0; i < board.length; i++)
+        fen_board[i] = board[i].slice();
+    var old_coord = square_to_coord(from);
+    var new_coord = square_to_coord(to);
+    var piece = fen_board[old_coord[0]][old_coord[1]];
+    fen_board[old_coord[0]][old_coord[1]] = 0;
+    fen_board[new_coord[0]][new_coord[1]] = piece;
+    return fen_board;
+}
+
+//Piece placement (from white's perspective). Each rank is described, starting with rank 8 and ending with rank 1; within each rank, the contents of each square are described from file "a" through file "h". Following the Standard Algebraic Notation (SAN), each piece is identified by a single letter taken from the standard English names (pawn = "P", knight = "N", bishop = "B", rook = "R", queen = "Q" and king = "K").[1] White pieces are designated using upper-case letters ("PNBRQK") while black pieces use lowercase ("pnbrqk"). Empty squares are noted using digits 1 through 8 (the number of empty squares), and "/" separates ranks.
+function fen_piece_placement(fen_board) {
+    var piece_placement = "";
+    for (var i=7; i>=0; i--) {
+        var row = "";
+        var blankCount = 0;
+        for (var j=0; j<8; j++) {
+            if(fen_board[i][j] == 0) {
+                blankCount++;
+                if(j==7) {
+                    row += blankCount;
+                }
+            }
+            else {
+                if(blankCount > 0) {
+                    row += blankCount;
+                }
+                row += piece_to_fen(fen_board[i][j]);
+                blankCount = 0;
+            }
+            if (j==7 && i != 0) {
+                row += "/";
+            }
+        }
+        piece_placement += row;
+    }
+    return piece_placement;
+}
+
+function piece_to_fen(piece) {
+    var color = piece.substr(0,1);
+    var type = piece.substr(1,2);
+    if(color == 'w') {
+        return type.toUpperCase();
+    }
+    else {
+        return type.toLowerCase();
+    }
+}
+
+//Castling availability. If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside), "Q" (White can castle queenside), "k" (Black can castle kingside), and/or "q" (Black can castle queenside).
+function fen_castling_availability(fen_board) {
+    return "KQkq"; //TODO finish castling logic...
+}
+
+//En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a two-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
+function fen_en_passant_target_square(from, to) {
+    var old_coord = square_to_coord(from);
+    var new_coord = square_to_coord(to);
+    var piece = board[old_coord[0]][old_coord[1]];
+    if(piece == 'wp') {
+        //white pawn on initial row and moved 2 spaces
+        if(old_coord[0] == 1 && new_coord[0] == 3) {
+            return coord_to_square([2,old_coord[1]]);
+        }
+    }
+    else if(piece == 'bp') {
+        //black pawn on initial row and moved 2 spaces
+        if(old_coord[0] == 6 && new_coord[0] == 4) {
+            return coord_to_square([5,old_coord[1]]);
+        }
+    }
+    return "-";
+}
+
+//Halfmove clock: This is the number of halfmoves since the last capture or pawn advance. This is used to determine if a draw can be claimed under the fifty-move rule.
+function fen_halfmove_clock() {
+    return halfmove_clock; //TODO finish halfmove clock
+}
+
+//Fullmove number: The number of the full move. It starts at 1, and is incremented after Black's move.
+function fen_fullmove_number() {
+    return fullmove_number;
 }
 
 //onload
