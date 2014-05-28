@@ -620,8 +620,27 @@ function legal_move_color(square) {
     return (color == 'white') ? "#FFFF99" : "#999966";
 }
 
+function does_move_cause_check(coord)
+{
+    //from the selected piece and move, check if the white king is in chess
+    var from = selectedSquare;
+    console.log('from='+from);
+    var to = coord_to_square(coord);
+    console.log('to='+to);
+    var new_board = create_new_board(from, to);
+    console.log('new_board='+new_board);
+
+    //TODO get white enemy king location (probably should just cache the king location(s) during board updates
+    return false;
+}
+
 //highlight the legal move on the board for this coord and track in global array
 function add_legal_move(coord) {
+    //validate this move doesn't place them in check
+    if(does_move_cause_check(coord)) {
+        return;
+    }
+
     var square = coord_to_square(coord);
     document.getElementById(square).style.backgroundColor = legal_move_color(square);
     legal_moves.push(square);
@@ -686,7 +705,7 @@ function set_highlighted_move(move) {
 //example initial board:  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 function calculate_fen(active_color, from, to) {
     //create a new local copy of the board and simulate the current move
-    var fen_board = create_fen_board(from, to);
+    var fen_board = create_new_board(from, to);
 
     //6 part string separated by spaces
     var fen = ""; 
@@ -708,16 +727,16 @@ function calculate_fen(active_color, from, to) {
     document.getElementById('fen_record').value = fen;
 }
 
-function create_fen_board(from, to) {
-    var fen_board = [];
+function create_new_board(from, to) {
+    var new_board = [];
     for (var i = 0; i < board.length; i++)
-        fen_board[i] = board[i].slice();
+        new_board[i] = board[i].slice();
     var old_coord = square_to_coord(from);
     var new_coord = square_to_coord(to);
-    var piece = fen_board[old_coord[0]][old_coord[1]];
-    fen_board[old_coord[0]][old_coord[1]] = 0;
-    fen_board[new_coord[0]][new_coord[1]] = piece;
-    return fen_board;
+    var piece = new_board[old_coord[0]][old_coord[1]];
+    new_board[old_coord[0]][old_coord[1]] = 0;
+    new_board[new_coord[0]][new_coord[1]] = piece;
+    return new_board;
 }
 
 //Piece placement (from white's perspective). Each rank is described, starting with rank 8 and ending with rank 1; within each rank, the contents of each square are described from file "a" through file "h". Following the Standard Algebraic Notation (SAN), each piece is identified by a single letter taken from the standard English names (pawn = "P", knight = "N", bishop = "B", rook = "R", queen = "Q" and king = "K").[1] White pieces are designated using upper-case letters ("PNBRQK") while black pieces use lowercase ("pnbrqk"). Empty squares are noted using digits 1 through 8 (the number of empty squares), and "/" separates ranks.
