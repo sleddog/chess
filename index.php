@@ -620,7 +620,7 @@ function legal_move_color(square) {
     return (color == 'white') ? "#FFFF99" : "#999966";
 }
 
-function does_move_cause_check(coord)
+function is_king_in_check(coord)
 {
     //from the selected piece and move, check if the white king is in chess
     var from = selectedSquare;
@@ -630,14 +630,217 @@ function does_move_cause_check(coord)
     var new_board = create_new_board(from, to);
     console.log('new_board='+new_board);
 
-    //TODO get white enemy king location (probably should just cache the king location(s) during board updates
+    king_loc = get_king_location('w', new_board);
+    console.log('king_loc'+king_loc);
+    //is this king in check? i.e. does this location now fall within black's attack squares?
+    //TODO calculate black attack squares
+    //black_attack_coords = get_black_attack_coords(new_board);
+    //console.log('black_attack_coords = ' + black_attack_coords);
+    //TODO does king loc belong to these attack squares?
     return false;
+}
+
+function get_black_attack_coords(bd) {
+		attack_coords = [];
+    for (var i=0; i<8; i++) {
+        for (var j=0; j<8; j++) {
+            //if this is a black piece
+            if(bd[i][j] != 0 && bd[i][j].substr(0,1) == 'b') {
+                //get legal moves for this piece
+                moves = get_legal_black_moves(bd, [i,j]);
+                console.log('moves = '+moves);
+                attack_coords.push([i,j]);
+            }
+        }
+    }
+    return attack_coords;
+}
+
+function get_legal_black_moves(bd, coord) {
+    var piece = bd[coord[0]][coord[1]];
+    var color = piece.substring(0,1);
+    var type = piece.substring(1,2);
+    switch(type) {
+        case 'p':
+            return legal_black_pawn_moves(bd, coord);
+            break;
+        case 'n':
+            return legal_black_knight_moves(bd, coord);
+            break;
+        case 'b':
+            return legal_black_bishop_moves(bd, coord);
+            break;
+        case 'r':
+            return legal_black_rook_moves(bd, coord);
+            break;
+        case 'q':
+            return legal_black_queen_moves(bd, coord);
+            break;
+        case 'k':
+            return legal_black_king_moves(bd, coord);
+            break;
+        default:
+            console.log('default case');
+            console.log(type);
+            break;
+    }
+}
+function legal_black_pawn_moves(bd, coord) {
+		var moves = [];
+    var newCoord = [coord[0]-1, coord[1]];
+    //if first square below blank?
+    if(bd[newCoord[0]][newCoord[1]] == 0) {
+        moves.push(newCoord);
+
+        //now check 2 moves below if on the 7th row (6 on the board)
+        if(coord[0] == 6) {
+            var newCoord2 = [coord[0]-2, coord[1]];
+            if(bd[newCoord2[0]][newCoord2[1]] == 0) {
+                moves.push(newCoord2);
+            }
+        } 
+    }
+
+    //can you attack diagonally?
+    diag_right = [coord[0]-1, coord[1]+1];
+    if(diag_right[1] <= 7) {
+        var piece = bd[diag_right[0]][diag_right[1]];
+        if(piece != 0) {
+            //if a piece exists and is white
+            if(piece.substring(0,1) == 'w') {
+                moves.push(diag_right);
+            }
+        }
+    }
+    diag_left = [coord[0]-1, coord[1]-1];
+    if(diag_left[1] >= 0) {
+        var piece = bd[diag_left[0]][diag_left[1]];
+        if(piece != 0) {
+            //if a piece exists and is white
+            if(piece.substring(0,1) == 'w') {
+                moves.push(diag_left);
+            }
+        }
+    }
+		//TODO en passant
+		return moves;
+}
+
+function legal_black_knight_moves(bd, coord) {
+    //create an array of coords, based on knight's movement (L shape)
+    var moves = new Array(8); 
+    moves[0] = [coord[0]+2, coord[1]-1];
+    moves[1] = [coord[0]+2, coord[1]+1];
+    moves[2] = [coord[0]-2, coord[1]-1];
+    moves[3] = [coord[0]-2, coord[1]+1];
+    moves[4] = [coord[0]+1, coord[1]-2];
+    moves[5] = [coord[0]+1, coord[1]+2];
+    moves[6] = [coord[0]-1, coord[1]-2];
+    moves[7] = [coord[0]-1, coord[1]+2];
+    //check each move
+		legal_moves = [];
+    for(var i=0; i<8; i++) {
+        if(black_can_move(bd, moves[i])) {
+            legal_moves.push(moves[i]);
+        }
+    }
+		return legal_moves;
+}
+
+function black_can_move(bd, coord) {
+		console.log('black_can_move(bd='+bd+',coord='+coord+')');
+    //is off board?
+    if(coord[0] < 0 || coord[0] > 7 || coord[1] < 0 || coord[1] > 7) {
+        return false;
+    }
+    //is the square empty?
+    var square = bd[coord[0]][coord[1]];
+    if(square == 0) {
+        return true;
+    }
+    else {
+        if(square.substring(0,1) == 'w') {
+            //white piece exists in this square
+            return true;
+        }
+        else {
+            //black piece is already in place here
+            return false;
+        }
+    }
+}
+function get_legal_black_moves_from_directions(bd, directions, coord) {
+		legal_moves = [];
+    for(var i=0; i<directions.length; i++) {
+        var dir = directions[i];
+        var step = 1;
+        //for each direction, travel until the edge of board or piece
+        while(true) {
+            var move = [coord[0]+(dir[0]*step), coord[1]+(dir[1]*step)];
+            console.log(move);
+            if(black_can_move(bd, move)) {
+                legal_moves.push(move);
+                step++;
+                //if move is a white piece, stop calculating on this line
+                var square = bd[move[0]][move[1]];
+                if(square != 0 && square.substring(0,1) == 'w') {
+                    break;
+                }
+            }
+            else {
+                break; //can't move here...
+            }
+        }
+    }
+		return legal_moves;
+}
+
+function legal_black_bishop_moves(bd, coord) {
+    var directions = [[1,1],[1,-1],[-1,-1],[-1,1]];
+    return get_legal_black_moves_from_directions(bd, directions, coord);
+}
+
+
+function legal_black_rook_moves(bd, coord) {
+    var directions = [[1,0],[0,1],[-1,0],[0,-1]];
+    return get_legal_black_moves_from_directions(bd, directions, coord);
+}
+
+
+function legal_black_queen_moves(bd, coord) {
+		legal_moves = legal_black_bishop_moves(bd, coord);
+		return legal_moves.concat(legal_black_rook_moves(bd, coord));
+}
+
+
+function legal_black_king_moves(bd, coord) {
+	  var legal_moves = [];
+    var directions = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,-1],[-1,1]];
+    for(var i=0; i<directions.length; i++) {
+        var move = [coord[0]+directions[i][0], coord[1]+directions[i][1]];
+        if(black_can_move(bd, move)) {
+            legal_moves.push(move);
+        }
+    }
+		return legal_moves;
+}
+
+
+function get_king_location(color, bd) {
+    for (var i=0; i<8; i++) {
+        for (var j=0; j<8; j++) {
+						if(bd[i][j] == 'wk') {
+                return [i,j];
+            }
+        }
+    }
+		return null; //error king should always be present on the board
 }
 
 //highlight the legal move on the board for this coord and track in global array
 function add_legal_move(coord) {
     //validate this move doesn't place them in check
-    if(does_move_cause_check(coord)) {
+    if(is_king_in_check(coord)) {
         return;
     }
 
