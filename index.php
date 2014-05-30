@@ -629,6 +629,9 @@ function is_king_in_check(coord)
     //console.log('new_board='+new_board);
 
     king_loc = get_king_location('w', new_board);
+    if(king_loc == null) {
+        return false;
+    }
     //console.log('king_loc'+king_loc);
     //is this king in check? i.e. does this location now fall within black's attack squares?
     //calculate black attack squares
