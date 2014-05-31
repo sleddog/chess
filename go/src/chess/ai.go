@@ -47,17 +47,20 @@ type ChessNode struct {
 }
 
 type Move struct {
-	orig_row int
-	orig_col int
-	dest_row int
-	dest_col int
-	piece    string
+	from  Coord
+	to    Coord
+	piece string
+}
+
+type Coord struct {
+	row int
+	col int
 }
 
 func formatNextMove(move Move) string {
 	columns := "abcdefgh"
-	fromSquare := string(columns[move.orig_col]) + strconv.Itoa(move.orig_row+1)
-	toSquare := string(columns[move.dest_col]) + strconv.Itoa(move.dest_row+1)
+	fromSquare := string(columns[move.from.col]) + strconv.Itoa(move.from.row+1)
+	toSquare := string(columns[move.to.col]) + strconv.Itoa(move.to.row+1)
 	nextMove := fmt.Sprintf("\"next-move\":\"%s-%s\"", fromSquare, toSquare)
 	return nextMove
 }
@@ -223,6 +226,9 @@ func getMovesForBlackPiece(piece string, row int, col int, node ChessNode) []Mov
 	case "p":
 		//fmt.Println("PAWN")
 		moves = append(moves, getMovesForBlackPawn(piece, row, col, node)...)
+	case "n":
+		//fmt.Println("PAWN")
+		moves = append(moves, getMovesForBlackKnight(piece, row, col, node)...)
 	default:
 		//fmt.Println("DEFAULT = ", piece)
 	}
@@ -231,15 +237,22 @@ func getMovesForBlackPiece(piece string, row int, col int, node ChessNode) []Mov
 
 func getMovesForBlackPawn(piece string, row int, col int, node ChessNode) []Move {
 	var moves []Move
+	fromCoord := Coord{row: row, col: col}
 
 	//check if first square in front is blank
 	if row > 0 && node.board[row-1][col] == "0" {
-		moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 1, dest_col: col, piece: piece})
+		moves = append(moves,
+			Move{from: fromCoord,
+				to:    Coord{row: row - 1, col: col},
+				piece: piece})
 
 		//check 2 moves in front if on the initial row (6th for black)
 		if row == 6 && node.board[row-2][col] == "0" {
 			//check 2 moves in front
-			moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 2, dest_col: col, piece: piece})
+			moves = append(moves,
+				Move{from: fromCoord,
+					to:    Coord{row: row - 2, col: col},
+					piece: piece})
 		}
 	}
 
@@ -247,14 +260,65 @@ func getMovesForBlackPawn(piece string, row int, col int, node ChessNode) []Move
 	if col > 0 && row > 0 {
 		attackSquare := node.board[row-1][col-1]
 		if attackSquare != "0" && attackSquare[0:1] == "w" {
-			moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 1, dest_col: col - 1, piece: piece})
+			moves = append(moves,
+				Move{from: fromCoord,
+					to:    Coord{row: row - 1, col: col - 1},
+					piece: piece})
 		}
 	}
 	//can you attack diagonally to the left?
 	if col < 7 && row > 0 {
 		attackSquare := node.board[row-1][col+1]
 		if attackSquare != "0" && attackSquare[0:1] == "w" {
-			moves = append(moves, Move{orig_row: row, orig_col: col, dest_row: row - 1, dest_col: col + 1, piece: piece})
+			moves = append(moves,
+				Move{from: fromCoord,
+					to:    Coord{row: row - 1, col: col + 1},
+					piece: piece})
+		}
+	}
+	return moves
+}
+
+func canBlackMove(node ChessNode, move Coord) bool {
+	//is off board?
+	if move.col < 0 || move.col > 7 || move.row < 0 || move.row > 7 {
+		return false
+	}
+
+	//is the square empty?
+	square := node.board[move.row][move.col]
+	if square == "0" {
+		return true
+	} else {
+		if square[0:1] == "w" {
+			//white piece exists in this square
+			return true
+		} else {
+			//black piece is already in place here
+			return false
+		}
+	}
+}
+
+func getMovesForBlackKnight(piece string, row int, col int, node ChessNode) []Move {
+	var moves []Move
+	var possibleMoves [8]Coord
+	possibleMoves[0] = Coord{row: row + 2, col: col - 1}
+	possibleMoves[1] = Coord{row: row + 2, col: col + 1}
+	possibleMoves[2] = Coord{row: row - 2, col: col - 1}
+	possibleMoves[3] = Coord{row: row - 2, col: col + 1}
+	possibleMoves[4] = Coord{row: row + 1, col: col - 2}
+	possibleMoves[5] = Coord{row: row + 1, col: col + 2}
+	possibleMoves[6] = Coord{row: row - 1, col: col - 2}
+	possibleMoves[7] = Coord{row: row - 1, col: col + 2}
+
+	fromCoord := Coord{row: row, col: col}
+	for i := 0; i < 8; i++ {
+		if canBlackMove(node, possibleMoves[i]) {
+			moves = append(moves,
+				Move{from: fromCoord,
+					to:    possibleMoves[i],
+					piece: piece})
 		}
 	}
 	return moves

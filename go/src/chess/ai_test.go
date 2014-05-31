@@ -29,6 +29,7 @@ func TestGetLegalBlackMoves(t *testing.T) {
 	node := createChessNode(initial_board_json)
 	legal_black_moves := getLegalBlackMoves(node)
 	fmt.Println("legal_black_moves = ", legal_black_moves)
+	fmt.Println("count = ", len(legal_black_moves))
 }
 
 func TestGetNextMoveUsingArray(t *testing.T) {
