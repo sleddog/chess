@@ -229,6 +229,10 @@ func getMovesForBlackPiece(piece string, row int, col int, node ChessNode) []Mov
 		moves = append(moves, getMovesForBlackKnight(piece, row, col, node)...)
 	case "b":
 		moves = append(moves, getMovesForBlackBishop(piece, row, col, node)...)
+	case "r":
+		moves = append(moves, getMovesForBlackRook(piece, row, col, node)...)
+	case "q":
+		moves = append(moves, getMovesForBlackQueen(piece, row, col, node)...)
 	default:
 		//fmt.Println("DEFAULT = ", piece)
 	}
