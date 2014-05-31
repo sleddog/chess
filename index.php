@@ -348,7 +348,6 @@ function submit_move() {
     var selectedMove = selectedSquare + '-' + targetSquare;
     var formattedMove = '';
     var special_move = is_special_move(selectedMove);
-    console.log('special_move = ' + special_move);
     if(special_move) {
         //variable flipped for special moves (en passant and castling)
         formattedMove = special_move;
@@ -1031,7 +1030,6 @@ function perform_special_moves(bd, from, to) {
                 break;
             case 'O-O-O':
                 //move the rook from a1 to d1
-                console.log('move rook for queen side castle');
                 bd = move_pieces_on_board(bd, square_to_coord('a1'), square_to_coord('d1'));
                 break;
         }
