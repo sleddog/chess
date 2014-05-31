@@ -358,3 +358,20 @@ func getMovesForBlackBishop(piece string, row int, col int, node ChessNode) []Mo
 	from := Coord{row: row, col: col}
 	return getMovesFromDirections(node, directions, from, piece)
 }
+
+func getMovesForBlackRook(piece string, row int, col int, node ChessNode) []Move {
+	var directions [][2]int
+	directions = append(directions, [2]int{1, 0})
+	directions = append(directions, [2]int{0, 1})
+	directions = append(directions, [2]int{-1, 0})
+	directions = append(directions, [2]int{0, -1})
+	from := Coord{row: row, col: col}
+	return getMovesFromDirections(node, directions, from, piece)
+}
+
+func getMovesForBlackQueen(piece string, row int, col int, node ChessNode) []Move {
+	var moves []Move
+	moves = append(moves, getMovesForBlackBishop(piece, row, col, node)...)
+	moves = append(moves, getMovesForBlackRook(piece, row, col, node)...)
+	return moves
+}
