@@ -224,11 +224,11 @@ func getMovesForBlackPiece(piece string, row int, col int, node ChessNode) []Mov
 	piece_type := piece[1:2]
 	switch piece_type {
 	case "p":
-		//fmt.Println("PAWN")
 		moves = append(moves, getMovesForBlackPawn(piece, row, col, node)...)
 	case "n":
-		//fmt.Println("PAWN")
 		moves = append(moves, getMovesForBlackKnight(piece, row, col, node)...)
+	case "b":
+		moves = append(moves, getMovesForBlackBishop(piece, row, col, node)...)
 	default:
 		//fmt.Println("DEFAULT = ", piece)
 	}
@@ -322,4 +322,39 @@ func getMovesForBlackKnight(piece string, row int, col int, node ChessNode) []Mo
 		}
 	}
 	return moves
+}
+
+func getMovesFromDirections(node ChessNode, dirs [][2]int, from Coord, piece string) []Move {
+	var moves []Move
+	for i := 0; i < len(dirs); i++ {
+		dir := dirs[i]
+		step := 1
+		//for each direction, travel until the edge of board or piece
+		for {
+			move := Coord{row: from.row + dir[0]*step,
+				col: from.col + dir[1]*step}
+			if canBlackMove(node, move) {
+				moves = append(moves, Move{from: from, to: move, piece: piece})
+				step = step + 1
+				//if move is a white piece, stop calculating on this line
+				square := node.board[move.row][move.col]
+				if square != "0" && square[0:1] == "w" {
+					break
+				}
+			} else {
+				break
+			}
+		}
+	}
+	return moves
+}
+
+func getMovesForBlackBishop(piece string, row int, col int, node ChessNode) []Move {
+	var directions [][2]int
+	directions = append(directions, [2]int{1, 1})
+	directions = append(directions, [2]int{1, -1})
+	directions = append(directions, [2]int{-1, 1})
+	directions = append(directions, [2]int{-1, -1})
+	from := Coord{row: row, col: col}
+	return getMovesFromDirections(node, directions, from, piece)
 }
