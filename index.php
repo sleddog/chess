@@ -358,8 +358,8 @@ function submit_move() {
                 move_pieces('h1', 'f1');
                 break;
             case 'O-O-O':
-                //move the rook from a1 to c1
-                move_pieces('a1', 'c1');
+                //move the rook from a1 to cd
+                move_pieces('a1', 'd1');
                 break;
         }
     }
@@ -645,7 +645,7 @@ function king_castle_moves(coord, color) {
             if(kingSideRook == 'wr') {
                 //check for blank squares
                 if(board[0][5] == 0 && board[0][6] == 0) {
-                    console.log('white king can castle on the king side: O-O');
+                    //white king can castle on the king side: O-O
                     special_moves[coord_to_square(coord)+'-'+coord_to_square([0,6])] = 'O-O';
                     add_legal_move([0, 6]);
                 }
@@ -654,9 +654,9 @@ function king_castle_moves(coord, color) {
             if(queenSideRook == 'wr') {
                 //check for blank squares
                 if(board[0][1] == 0 && board[0][2] == 0 && board[0][3] == 0) {
-                    console.log('white king can castle on the queen side: O-O-O');
-                    special_moves[coord_to_square(coord)+'-'+coord_to_square([0,4])] = 'O-O-O';
-                    add_legal_move([0, 4]);
+                    //white king can castle on the queen side: O-O-O
+                    special_moves[coord_to_square(coord)+'-'+coord_to_square([0,2])] = 'O-O-O';
+                    add_legal_move([0, 2]);
                 }
             }
         }
@@ -1023,7 +1023,6 @@ function move_pieces_on_board(bd, old_coord, new_coord) {
 
 function perform_special_moves(bd, from, to) {
     var special_move = is_special_move(from+'-'+to);
-    console.log('special_move = ' + special_move);
     if(special_move) {
         switch(special_move) {
             case 'O-O':
@@ -1031,8 +1030,9 @@ function perform_special_moves(bd, from, to) {
                 bd = move_pieces_on_board(bd, square_to_coord('h1'), square_to_coord('f1'));
                 break;
             case 'O-O-O':
-                //move the rook from a1 to c1
-                bd = move_pieces_on_board(bd, square_to_coord('a1'), square_to_coord('c1'));
+                //move the rook from a1 to d1
+                console.log('move rook for queen side castle');
+                bd = move_pieces_on_board(bd, square_to_coord('a1'), square_to_coord('d1'));
                 break;
         }
     }
@@ -1139,7 +1139,6 @@ function fen_fullmove_number() {
 }
 
 function is_special_move(move) {
-    console.log(special_moves);
     //check if this move is in the special_moves dictionary
     if (special_moves.hasOwnProperty(move)) {
         return special_moves[move];
