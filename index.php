@@ -155,6 +155,7 @@ var history = [];
 var highlighted_move;
 var halfmove_clock = 0;
 var fullmove_number = 1;
+var special_moves = {};
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -266,6 +267,7 @@ function reset_initial_square() {
     selectedSquare = 0;
     document.getElementById('piece_from').value = '';
     reset_target_square();
+    special_moves = {};
 }
 
 function reset_target_square() {
@@ -344,7 +346,26 @@ function submit_move() {
         return;
     }
     var selectedMove = selectedSquare + '-' + targetSquare;
-    var formattedMove = format_move(selectedMove);
+    var formattedMove = '';
+    var special_move = is_special_move(selectedMove);
+    console.log('special_move = ' + special_move);
+    if(special_move) {
+        //variable flipped for special moves (en passant and castling)
+        formattedMove = special_move;
+        switch(special_move) {
+            case 'O-O':
+                //move the rook from h1 to f1
+                move_pieces('h1', 'f1');
+                break;
+            case 'O-O-O':
+                //move the rook from a1 to c1
+                move_pieces('a1', 'c1');
+                break;
+        }
+    }
+    else {
+        formattedMove = format_move(selectedMove);
+    }
 
     //move the piece
     move_pieces(selectedSquare, targetSquare);
@@ -625,6 +646,8 @@ function king_castle_moves(coord, color) {
                 //check for blank squares
                 if(board[0][5] == 0 && board[0][6] == 0) {
                     console.log('white king can castle on the king side: O-O');
+                    special_moves[coord_to_square(coord)+'-'+coord_to_square([0,6])] = 'O-O';
+                    add_legal_move([0, 6]);
                 }
             }
             var queenSideRook = board[0][0];
@@ -632,6 +655,8 @@ function king_castle_moves(coord, color) {
                 //check for blank squares
                 if(board[0][1] == 0 && board[0][2] == 0 && board[0][3] == 0) {
                     console.log('white king can castle on the queen side: O-O-O');
+                    special_moves[coord_to_square(coord)+'-'+coord_to_square([0,4])] = 'O-O-O';
+                    add_legal_move([0, 4]);
                 }
             }
         }
@@ -965,7 +990,7 @@ function calculate_fen(active_color, from, to) {
     //2. Active color. "w" means White moves next, "b" means Black.
     fen += active_color + " ";
     //3. Castling availability.
-    fen += fen_castling_availability(fen_board) + " ";
+    fen += fen_castling_availability(fen_board, from, to) + " ";
     //4. En passant target square in algebraic notation
     fen += fen_en_passant_target_square(from, to) + " ";
     //5. Halfmove clock
@@ -983,10 +1008,35 @@ function create_new_board(from, to) {
         new_board[i] = board[i].slice();
     var old_coord = square_to_coord(from);
     var new_coord = square_to_coord(to);
-    var piece = new_board[old_coord[0]][old_coord[1]];
-    new_board[old_coord[0]][old_coord[1]] = 0;
-    new_board[new_coord[0]][new_coord[1]] = piece;
+    new_board = move_pieces_on_board(new_board, old_coord, new_coord);
+    //perform any special moves that may exist
+    new_board = perform_special_moves(new_board, from, to);
     return new_board;
+}
+
+function move_pieces_on_board(bd, old_coord, new_coord) {
+    var piece = bd[old_coord[0]][old_coord[1]];
+    bd[old_coord[0]][old_coord[1]] = 0;
+    bd[new_coord[0]][new_coord[1]] = piece;
+    return bd;
+}
+
+function perform_special_moves(bd, from, to) {
+    var special_move = is_special_move(from+'-'+to);
+    console.log('special_move = ' + special_move);
+    if(special_move) {
+        switch(special_move) {
+            case 'O-O':
+                //move the rook from h1 to f1
+                bd = move_pieces_on_board(bd, square_to_coord('h1'), square_to_coord('f1'));
+                break;
+            case 'O-O-O':
+                //move the rook from a1 to c1
+                bd = move_pieces_on_board(bd, square_to_coord('a1'), square_to_coord('c1'));
+                break;
+        }
+    }
+    return bd;
 }
 
 //Piece placement (from white's perspective). Each rank is described, starting with rank 8 and ending with rank 1; within each rank, the contents of each square are described from file "a" through file "h". Following the Standard Algebraic Notation (SAN), each piece is identified by a single letter taken from the standard English names (pawn = "P", knight = "N", bishop = "B", rook = "R", queen = "Q" and king = "K").[1] White pieces are designated using upper-case letters ("PNBRQK") while black pieces use lowercase ("pnbrqk"). Empty squares are noted using digits 1 through 8 (the number of empty squares), and "/" separates ranks.
@@ -1030,8 +1080,32 @@ function piece_to_fen(piece) {
 }
 
 //Castling availability. If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside), "Q" (White can castle queenside), "k" (Black can castle kingside), and/or "q" (Black can castle queenside).
-function fen_castling_availability(fen_board) {
-    return "KQkq"; //TODO finish castling logic...
+function fen_castling_availability(fen_board, from, to) {
+    var castling_available = {'K':true, 'Q':true, 'k':true, 'q':true};
+    //TODO determine if the king's can actually castle based on the from and to information
+    var old_coord = square_to_coord(from);
+    var new_coord = square_to_coord(to);
+    var piece = board[old_coord[0]][old_coord[1]];
+    switch(piece) {
+        case 'wk':
+            castling_available['K'] = false;
+            castling_available['Q'] = false;
+            break;
+        case 'bk':
+            castling_available['k'] = false;
+            castling_available['q'] = false;
+            break;
+    }
+
+    var str = '';
+    str += castling_available['K'] ? 'K' : '';
+    str += castling_available['Q'] ? 'Q' : '';
+    str += castling_available['k'] ? 'k' : '';
+    str += castling_available['q'] ? 'q' : '';
+    if(str == '') {
+        str = '-';
+    }
+    return str;
 }
 
 //En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a two-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
@@ -1062,6 +1136,15 @@ function fen_halfmove_clock() {
 //Fullmove number: The number of the full move. It starts at 1, and is incremented after Black's move.
 function fen_fullmove_number() {
     return fullmove_number;
+}
+
+function is_special_move(move) {
+    console.log(special_moves);
+    //check if this move is in the special_moves dictionary
+    if (special_moves.hasOwnProperty(move)) {
+        return special_moves[move];
+    }
+    return null;
 }
 
 //onload
