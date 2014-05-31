@@ -85,10 +85,56 @@ function get_random_board()
     return $board;
 }
 
+function get_board_from_fen($fen)
+{
+    global $num_to_letter, $pieces;
+
+    //split fen into its 6 parts
+    $fen_parts = split(" ", $fen);
+
+    //for now just using first part which is just placement:  
+    //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+    $rows = split("/", $fen_parts[0]);
+    $currentRow = 8;
+    $board = '{';
+    foreach($rows as $row) {
+        $currentCol = 1;
+        $row_arr = str_split($row);
+        foreach($row_arr as $char) {
+            if(is_numeric($char)) {
+                $step = intval($char);
+            }
+            else { //add the piece
+                $l = $num_to_letter[$currentCol-1];
+                $square = "$l$currentRow";
+                $piece = convert_fen_piece($char);
+                $board .= '"'.$square.'":"'.$piece.'",';
+                $step = 1;
+            }
+            $currentCol = $currentCol + $step;
+        }
+        $currentRow = $currentRow - 1;
+    }
+    $board = rtrim($board, ",");
+    $board .= '}';
+    return $board;
+}
+
+function convert_fen_piece($char) {
+    //uppercase are white, lowercase are black
+    $color = ctype_upper($char) ? 'w' : 'b';
+    return $color . strtolower($char);
+}
+
 
 //define what board JSON to use for initial load
 if($_GET['random']) {
     $board_to_draw = get_random_board(); 
+}
+else if($_GET['fen']) {
+    //initial fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    $fen = $_GET['fen'];
+    $board_to_draw = get_board_from_fen($fen); 
 }
 else {
     $board_to_draw = get_initial_board();
@@ -142,6 +188,8 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
 <a href='http://en.wikipedia.org/wiki/Forsyth-Edwards_Notation'>FEN record</a> (experimental)<br />
 <input type='text' class='input-lg' style='width:700px' id='fen_record' name='fen_record' value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" />
+<br />
+<a href="javascript:void(0);" onclick="open_fen_in_new_tab()" />Open in New Tab</a>
 </div>
 
 <script>
@@ -1142,6 +1190,12 @@ function is_special_move(move) {
         return special_moves[move];
     }
     return null;
+}
+
+function open_fen_in_new_tab() {
+    var fen = document.getElementById('fen_record').value;
+    console.log('fen = ' + fen);
+    window.open('/chess/?fen='+encodeURIComponent(fen), '_blank');
 }
 
 //onload
