@@ -130,13 +130,14 @@ function convert_fen_piece($char) {
 //define what board JSON to use for initial load
 if($_GET['random']) {
     $board_to_draw = get_random_board(); 
+    //TODO create a convert board to fen function to display random board's initial fen
 }
 else if($_GET['fen']) {
-    //initial fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     $fen = $_GET['fen'];
     $board_to_draw = get_board_from_fen($fen); 
 }
 else {
+    $fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     $board_to_draw = get_initial_board();
 }
 ?>
@@ -187,9 +188,11 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 </tr></table>
 <hr />
 <a href='http://en.wikipedia.org/wiki/Forsyth-Edwards_Notation'>FEN record</a> (experimental)<br />
-<input type='text' class='input-lg' style='width:700px' id='fen_record' name='fen_record' value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" />
+<input type='text' class='input-lg' style='width:700px' id='fen_record' name='fen_record' value="<?=$fen;?>" />
 <br />
 <a href="javascript:void(0);" onclick="open_fen_in_new_tab()" />Open in New Tab</a>
+<hr />
+<a href="javascript:void(0);" onclick="open_random_in_new_tab()" />Random Board?</a> (piece generation chance: <input type='text' id='rand_amount' name='rand_amount' value='50' style='width:25px' />%)
 </div>
 
 <script>
@@ -1194,8 +1197,12 @@ function is_special_move(move) {
 
 function open_fen_in_new_tab() {
     var fen = document.getElementById('fen_record').value;
-    console.log('fen = ' + fen);
     window.open('/chess/?fen='+encodeURIComponent(fen), '_blank');
+}
+
+function open_random_in_new_tab() {
+    var rand_amount = document.getElementById('rand_amount').value;
+    window.open('/chess/?random=True&blank_chance='+parseInt(rand_amount), '_blank');
 }
 
 //onload
