@@ -608,6 +608,33 @@ function legal_king_moves(coord, color) {
                 add_legal_move(move);
             }
         }
+        king_castle_moves(coord, color);
+    }
+    else { // color == 'b'
+    }
+}
+
+function king_castle_moves(coord, color) {
+    if(color == 'w') {
+        //TODO use the FEN board to know if castling is allowed
+        //for now just assume you can if the king and rook are in original location
+        //and there are blank pieces between them
+        if(coord[0] == 0 && coord[1] == 4) { //original location of king
+            var kingSideRook = board[0][7];
+            if(kingSideRook == 'wr') {
+                //check for blank squares
+                if(board[0][5] == 0 && board[0][6] == 0) {
+                    console.log('white king can castle on the king side: O-O');
+                }
+            }
+            var queenSideRook = board[0][0];
+            if(queenSideRook == 'wr') {
+                //check for blank squares
+                if(board[0][1] == 0 && board[0][2] == 0 && board[0][3] == 0) {
+                    console.log('white king can castle on the queen side: O-O-O');
+                }
+            }
+        }
     }
     else { // color == 'b'
     }
