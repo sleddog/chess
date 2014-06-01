@@ -85,16 +85,30 @@ function get_random_board()
     return $board;
 }
 
+//default values for FEN parts
+$placement = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+$active_color = "w";
+$castling_availability = "KQkq";
+$en_passant_target = "-";
+$halfmove_clock = 0;
+$fullmove_number = 0;
+
 function get_board_from_fen($fen)
 {
-    global $num_to_letter, $pieces;
+    global $num_to_letter, $pieces, $placement, $active_color, $castling_availability, $en_passant_target, $halfmove_clock, $fullmove_number;
 
     //split fen into its 6 parts
     $fen_parts = split(" ", $fen);
+    $placement = $fen_parts[0];
+    $active_color = $fen_parts[1];
+    $castling_availability = $fen_parts[2];
+    $en_passant_target = $fen_parts[3];
+    $halfmove_clock = $fen_parts[4];
+    $fullmove_number = $fen_parts[5];
 
     //for now just using first part which is just placement:  
     //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
-    $rows = split("/", $fen_parts[0]);
+    $rows = split("/", $placement);
     $currentRow = 8;
     $board = '{';
     foreach($rows as $row) {
@@ -207,6 +221,7 @@ var highlighted_move;
 var halfmove_clock = 0;
 var fullmove_number = 1;
 var special_moves = {};
+var en_passant_target = "<?=$en_passant_target;?>";
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -411,6 +426,16 @@ function submit_move() {
                 //move the rook from a1 to cd
                 move_pieces('a1', 'd1');
                 break;
+            default: 
+                //en passant example notation = 'exd6e.p.'    
+                if(special_move.substring(4,8) == "e.p.") {
+                    //need to remove the attacked pawn (this example pawn on d5)
+                    var remove_square = targetSquare.substring(0,1) + "5"; //always 5th for white
+                    var remove_coord = square_to_coord(remove_square);
+                    board[remove_coord[0]][remove_coord[1]] = 0;
+                    document.getElementById(remove_square).innerHTML = '&nbsp;';
+                }
+                break;
         }
     }
     else {
@@ -567,9 +592,33 @@ function legal_pawn_moves(coord, color) {
             }
         }
 
+        //finally check if an en passant target square is set
+        if(en_passant_target != "-") {
+            var en_passant_target_coord = square_to_coord(en_passant_target);
+            if(coords_equal(en_passant_target_coord, diag_right)) {
+                var from = coord_to_square(coord);
+                //special en passant notation, example: exd6e.p.
+                var notation = from.substring(0,1)+'x'+en_passant_target+'e.p.';
+                special_moves[from+'-'+en_passant_target] = notation;
+                add_legal_move(diag_right);
+            }
+            if(coords_equal(en_passant_target_coord, diag_left)) {
+                var from = coord_to_square(coord);
+                //special en passant notation, example: exd6e.p.
+                var notation = from.substring(0,1)+'x'+en_passant_target+'e.p.';
+                special_moves[from+'-'+en_passant_target] = notation;
+                add_legal_move(diag_left);
+            }
+        }
+        
+
     }
     else { // color == 'b'
     }
+}
+
+function coords_equal(coord1, coord2) {
+    return ((coord1[0] == coord2[0]) && (coord1[1] == coord2[1]));
 }
 
 function legal_knight_moves(coord, color) {
@@ -1042,7 +1091,7 @@ function calculate_fen(active_color, from, to) {
     //3. Castling availability.
     fen += fen_castling_availability(fen_board, from, to) + " ";
     //4. En passant target square in algebraic notation
-    fen += fen_en_passant_target_square(from, to) + " ";
+    fen += fen_en_passant_target(from, to) + " ";
     //5. Halfmove clock
     fen += fen_halfmove_clock() + " ";
     //6. Fullmove number
@@ -1082,6 +1131,15 @@ function perform_special_moves(bd, from, to) {
             case 'O-O-O':
                 //move the rook from a1 to d1
                 bd = move_pieces_on_board(bd, square_to_coord('a1'), square_to_coord('d1'));
+                break;
+            default: 
+                //en passant example notation = 'exd6e.p.'    
+                if(special_move.substring(4,8) == "e.p.") {
+                    //need to remove the attacked pawn (this example pawn on d5)
+                    var remove_square = to.substring(0,1) + "5"; //always 5th for white
+                    var remove_coord = square_to_coord(remove_square);
+                    bd[remove_coord[0]][remove_coord[1]] = 0;
+                }
                 break;
         }
     }
@@ -1158,23 +1216,24 @@ function fen_castling_availability(fen_board, from, to) {
 }
 
 //En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a two-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
-function fen_en_passant_target_square(from, to) {
+function fen_en_passant_target(from, to) {
     var old_coord = square_to_coord(from);
     var new_coord = square_to_coord(to);
     var piece = board[old_coord[0]][old_coord[1]];
+    en_passant_target = "-";
     if(piece == 'wp') {
         //white pawn on initial row and moved 2 spaces
         if(old_coord[0] == 1 && new_coord[0] == 3) {
-            return coord_to_square([2,old_coord[1]]);
+            en_passant_target = coord_to_square([2,old_coord[1]]);
         }
     }
     else if(piece == 'bp') {
         //black pawn on initial row and moved 2 spaces
         if(old_coord[0] == 6 && new_coord[0] == 4) {
-            return coord_to_square([5,old_coord[1]]);
+            en_passant_target = coord_to_square([5,old_coord[1]]);
         }
     }
-    return "-";
+    return en_passant_target;
 }
 
 //Halfmove clock: This is the number of halfmoves since the last capture or pawn advance. This is used to determine if a draw can be claimed under the fifty-move rule.
