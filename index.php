@@ -1,8 +1,8 @@
 <?php
 /*
-*  Author:  devingray@gmail.com
+*  Author:  Devin Gray <devingray@gmail.com>
 *  Very simple chess application written in PHP/HTML/Javascript on the frontend that 
-*  invokes a CGI program written in C
+*  invokes a CGI program written in Go on the backend
 */
 
 $num_to_letter = array('a','b','c','d','e','f','g','h');
@@ -106,8 +106,7 @@ function get_board_from_fen($fen)
     $halfmove_clock = $fen_parts[4];
     $fullmove_number = $fen_parts[5];
 
-    //for now just using first part which is just placement:  
-    //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+    //example = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
     $rows = split("/", $placement);
     $currentRow = 8;
     $board = '{';
@@ -384,7 +383,6 @@ function format_move(next_move)
             formattedMove = 'B'
             break;
         case 'r':
-            //TODO add castling moves '0-0' and '0-0-0'
             formattedMove = 'R'
             break;
         case 'q':
@@ -771,7 +769,7 @@ function legal_move_color(square) {
 
 function is_king_in_check(coord)
 {
-    //from the selected piece and move, check if the white king is in chess
+    //from the selected piece and move, check if the white king is in check
     var from = selectedSquare;
     //console.log('from='+from);
     var to = coord_to_square(coord);
@@ -1194,7 +1192,6 @@ function piece_to_fen(piece) {
 //Castling availability. If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside), "Q" (White can castle queenside), "k" (Black can castle kingside), and/or "q" (Black can castle queenside).
 function fen_castling_availability(fen_board, from, to) {
     var castling_available = {'K':true, 'Q':true, 'k':true, 'q':true};
-    //TODO determine if the king's can actually castle based on the from and to information
     var old_coord = square_to_coord(from);
     var new_coord = square_to_coord(to);
     var piece = board[old_coord[0]][old_coord[1]];
