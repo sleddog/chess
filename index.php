@@ -1091,7 +1091,12 @@ function calculate_fen(active_color, from, to) {
     //3. Castling availability.
     fen += fen_castling_availability(fen_board, from, to) + " ";
     //4. En passant target square in algebraic notation
-    fen += fen_en_passant_target(from, to) + " ";
+    target = fen_en_passant_target(from, to);
+    if(active_color == 'w') {
+        //cache the target square from black
+        en_passant_target = target;
+    }
+    fen += target + " ";
     //5. Halfmove clock
     fen += fen_halfmove_clock() + " ";
     //6. Fullmove number
@@ -1220,20 +1225,20 @@ function fen_en_passant_target(from, to) {
     var old_coord = square_to_coord(from);
     var new_coord = square_to_coord(to);
     var piece = board[old_coord[0]][old_coord[1]];
-    en_passant_target = "-";
+    target = "-";
     if(piece == 'wp') {
         //white pawn on initial row and moved 2 spaces
         if(old_coord[0] == 1 && new_coord[0] == 3) {
-            en_passant_target = coord_to_square([2,old_coord[1]]);
+            target = coord_to_square([2,old_coord[1]]);
         }
     }
     else if(piece == 'bp') {
         //black pawn on initial row and moved 2 spaces
         if(old_coord[0] == 6 && new_coord[0] == 4) {
-            en_passant_target = coord_to_square([5,old_coord[1]]);
+            target = coord_to_square([5,old_coord[1]]);
         }
     }
-    return en_passant_target;
+    return target;
 }
 
 //Halfmove clock: This is the number of halfmoves since the last capture or pawn advance. This is used to determine if a draw can be claimed under the fifty-move rule.
