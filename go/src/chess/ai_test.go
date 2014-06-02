@@ -39,3 +39,12 @@ func TestGetNextMoveUsingArray(t *testing.T) {
 	move := GetNextMoveUsingArray(dat)
 	fmt.Println("move=", move)
 }
+
+func TestParseFen(t *testing.T) {
+	//fen := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+	//TODO split on space above, for now just use placement directly
+	fenPlacement := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+	fmt.Println("fen = ", fenPlacement)
+	board := createBoardUsingFen(fenPlacement)
+	fmt.Println("board = ", board)
+}

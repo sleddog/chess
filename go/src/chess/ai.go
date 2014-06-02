@@ -158,6 +158,50 @@ func createBoardUsingMap(dat map[string]string) [8][8]string {
 	return board
 }
 
+func createBoardUsingFen(fen string) [8][8]string {
+	//example = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+	rows := strings.Split(fen, "/")
+	currentRow := 8
+	var boardMap map[string]string
+	boardMap = make(map[string]string)
+	var step int
+	for i := 0; i < len(rows); i++ {
+		currentCol := 1
+		row := rows[i]
+		fmt.Println("row = ", row)
+		for j := 0; j < len(row); j++ {
+			char := string(row[j])
+			fmt.Println("char = ", char)
+			if intval, err := strconv.Atoi(char); err == nil {
+				step = intval
+			} else { //add the piece
+				l := numberToLetter(currentCol - 1)
+				square := l + strconv.Itoa(currentRow)
+				piece := convertFenPiece(char)
+				fmt.Println("piece = ", piece)
+				boardMap[square] = piece
+				step = 1
+			}
+			currentCol = currentCol + step
+		}
+		currentRow = currentRow - 1
+	}
+	//now convert the map into the board
+	return createBoardUsingMap(boardMap)
+}
+
+//converts FEN piece to my representation, i.e. 'K'->'wk', 'q'->'bq'
+func convertFenPiece(char string) string {
+	//uppercase character means white, otherwise black
+	var piece string
+	if strings.ToUpper(char) == char {
+		piece = "w"
+	} else {
+		piece = "b"
+	}
+	return piece + strings.ToLower(char)
+}
+
 func convertJsonToMap(board_json string) map[string]string {
 	//convert json to string map
 	byt := []byte(board_json)
