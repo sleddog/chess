@@ -398,6 +398,9 @@ function format_move(next_move)
         formattedMove += "x";
     }
     formattedMove += to;
+
+    //TODO determine if the opposite king is in check
+    //TODO determine if the game is over... i.e. checkmate
     return formattedMove;
 }
 
