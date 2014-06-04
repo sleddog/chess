@@ -350,7 +350,7 @@ function enable_submit_move() {
 
 // build a string representing the move in algebraic notation
 // http://en.wikipedia.org/wiki/Algebraic_notation_(chess)
-function format_move(next_move) 
+function format_move(next_move, color) 
 {
     //split next_move into individual squares
     var moves = next_move.split('-');
@@ -400,6 +400,8 @@ function format_move(next_move)
     formattedMove += to;
 
     //TODO determine if the opposite king is in check
+    //if(king_is_in_check(color, old_coord, new_coord)) {
+    //}
     //TODO determine if the game is over... i.e. checkmate
     return formattedMove;
 }
@@ -438,7 +440,7 @@ function submit_move() {
         }
     }
     else {
-        formattedMove = format_move(selectedMove);
+        formattedMove = format_move(selectedMove, 'w');
     }
 
     //move the piece
@@ -485,7 +487,7 @@ function make_move(next_move) {
     var old_coord = square_to_coord(moves[0]);
     var piece = board[old_coord[0]][old_coord[1]];
     if(piece && piece.substring(0,1) == 'b') {
-        var formattedMove = format_move(next_move);
+        var formattedMove = format_move(next_move, 'b');
         fullmove_number++;
         calculate_fen("w", moves[0], moves[1]);
         move_pieces(moves[0], moves[1]);
