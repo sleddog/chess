@@ -400,10 +400,44 @@ function format_move(next_move, color)
     formattedMove += to;
 
     //TODO determine if the opposite king is in check
-    //if(king_is_in_check(color, old_coord, new_coord)) {
-    //}
+    if(king_is_in_check(opposite_color(color), board, old_coord, new_coord)) {
+        console.log('color='+color+' king is in check');
+    }
     //TODO determine if the game is over... i.e. checkmate
     return formattedMove;
+}
+
+function opposite_color(color) {
+    return (color == 'w') ? 'b' : 'w';
+}
+
+function king_is_in_check(color, board, old_coord, new_coord) {
+    console.log('king_is_in_check(color='+color+', ..., old_coord='+old_coord+', new_coord='+new_coord);
+    var from = coord_to_square(old_coord);
+    var to = coord_to_square(new_coord);
+    var new_board = create_new_board(from, to);
+    console.log('new_board='+new_board);
+    king_loc = get_king_location(color, new_board);
+    console.log('king_loc='+king_loc);
+    if(king_loc == null) {
+        return false;
+    }
+    //console.log('king_loc'+king_loc);
+    //is this king in check? i.e. does this location now fall within black's attack squares?
+    //calculate black attack squares
+    //black_attack_coords = get_black_attack_coords(new_board);
+    //var num_moves = 0;
+    //for(var k=0; k<attack_coords.length; k++) {
+    //    var piece_moves = attack_coords[k].to;
+    //    num_moves += piece_moves.length;
+    //    for(i=0; i<piece_moves.length; i++) {
+    //        //does king loc belong to these attack squares?
+    //        if(king_loc[0] == piece_moves[i][0] && king_loc[1] == piece_moves[i][1]) {
+    //            return true;
+    //        }
+    //    }
+    //}
+    return false;
 }
 
 function submit_move() {
@@ -1002,7 +1036,7 @@ function legal_black_king_moves(bd, coord) {
 function get_king_location(color, bd) {
     for (var i=0; i<8; i++) {
         for (var j=0; j<8; j++) {
-						if(bd[i][j] == 'wk') {
+						if(bd[i][j] == color+'k') {
                 return [i,j];
             }
         }
