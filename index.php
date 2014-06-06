@@ -425,7 +425,6 @@ function king_is_in_check(color, bd, old_coord, new_coord) {
     var from = coord_to_square(old_coord);
     var to = coord_to_square(new_coord);
     var new_board = create_new_board(board, from, to);
-    console.log('new_board='+new_board);
     king_loc = get_king_location(color, new_board);
     console.log('king_loc='+king_loc);
     if(king_loc == null) {
@@ -434,7 +433,6 @@ function king_is_in_check(color, bd, old_coord, new_coord) {
     //is this king in check? i.e. does this location now fall within the opposite color's attack squares?
     //calculate attack squares
     attack_coords = get_attack_coords(new_board, opposite_color(color));
-    console.log('attack_coords='+attack_coords);
     var num_moves = 0;
     for(var k=0; k<attack_coords.length; k++) {
         var piece_moves = attack_coords[k].to;
@@ -450,14 +448,12 @@ function king_is_in_check(color, bd, old_coord, new_coord) {
 }
 
 function get_attack_coords(bd, color) {
-    console.log('get_attack_coords(.., color='+color);
 		attack_coords = [];
     for (var i=0; i<8; i++) {
         for (var j=0; j<8; j++) {
             if(bd[i][j] != 0 && bd[i][j].substr(0,1) == color) {
                 //get legal moves for this piece
                 moves = get_legal_moves(color, bd, [i,j]);
-                //console.log('moves = '+moves);
                 if(moves) {
                     attack_coords.push(moves);
                 }
