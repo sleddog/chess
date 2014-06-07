@@ -399,9 +399,8 @@ function format_move(next_move, color)
     }
     formattedMove += to;
 
-    //TODO determine if the opposite king is in check
+    // determine if the opposite king is in check
     if(king_is_in_check(opposite_color(color), board, old_coord, new_coord)) {
-        console.log('color='+color+' king is in check');
         formattedMove = formattedMove + "+";
     }
     //TODO determine if the game is over... i.e. checkmate
@@ -409,30 +408,23 @@ function format_move(next_move, color)
 }
 
 
-
-
-
-
-//REFACTOR START
-
-
 function opposite_color(color) {
     return (color == 'w') ? 'b' : 'w';
 }
 
+
 function king_is_in_check(color, bd, old_coord, new_coord) {
-    console.log('king_is_in_check(color='+color+', ..., old_coord='+old_coord+', new_coord='+new_coord);
     var from = coord_to_square(old_coord);
     var to = coord_to_square(new_coord);
-    var new_board = create_new_board(board, from, to);
+    var ep_target = fen_en_passant_target(bd, from, to);
+    var new_board = create_new_board(bd, from, to);
     king_loc = get_king_location(color, new_board);
-    console.log('king_loc='+king_loc);
     if(king_loc == null) {
         return false;
     }
     //is this king in check? i.e. does this location now fall within the opposite color's attack squares?
     //calculate attack squares
-    attack_coords = get_attack_coords(new_board, opposite_color(color));
+    attack_coords = get_attack_coords(new_board, opposite_color(color), ep_target);
     var num_moves = 0;
     for(var k=0; k<attack_coords.length; k++) {
         var piece_moves = attack_coords[k].to;
@@ -447,13 +439,14 @@ function king_is_in_check(color, bd, old_coord, new_coord) {
     return false;
 }
 
-function get_attack_coords(bd, color) {
+
+function get_attack_coords(bd, color, ep_target) {
 		attack_coords = [];
     for (var i=0; i<8; i++) {
         for (var j=0; j<8; j++) {
             if(bd[i][j] != 0 && bd[i][j].substr(0,1) == color) {
                 //get legal moves for this piece
-                moves = get_legal_moves(color, bd, [i,j]);
+                moves = get_legal_moves(color, bd, [i,j], ep_target);
                 if(moves) {
                     attack_coords.push(moves);
                 }
@@ -464,14 +457,14 @@ function get_attack_coords(bd, color) {
 }
 
 
-function get_legal_moves(color, bd, coord) {
+function get_legal_moves(color, bd, coord, ep_target) {
     var piece = bd[coord[0]][coord[1]];
     var type = piece.substring(1,2);
     //console.log('type='+type);
     var moves = [];
     switch(type) {
         case 'p':
-            moves = get_pawn_moves(color, bd, coord);
+            moves = get_pawn_moves(color, bd, coord, ep_target);
             break;
         case 'n':
             moves = get_knight_moves(color, bd, coord);
@@ -500,7 +493,7 @@ function get_legal_moves(color, bd, coord) {
         return null;
     }
 }
-function get_pawn_moves(color, bd, coord) {
+function get_pawn_moves(color, bd, coord, ep_target) {
 		var moves = [];
 
     if(color == 'w') {
@@ -540,7 +533,24 @@ function get_pawn_moves(color, bd, coord) {
             }
         }
 
-		    //TODO en passant
+		    // en passant
+        if(ep_target != "-") {
+            var en_passant_target_coord = square_to_coord(ep_target);
+            if(coords_equal(en_passant_target_coord, diag_right)) {
+                var from = coord_to_square(coord);
+                //special en passant notation, example: exd6e.p.
+                var notation = from.substring(0,1)+'x'+en_passant_target+'e.p.';
+                special_moves[from+'-'+en_passant_target] = notation;
+                moves.push(diag_right);
+            }
+            if(coords_equal(en_passant_target_coord, diag_left)) {
+                var from = coord_to_square(coord);
+                //special en passant notation, example: exd6e.p.
+                var notation = from.substring(0,1)+'x'+en_passant_target+'e.p.';
+                special_moves[from+'-'+en_passant_target] = notation;
+                moves.push(diag_left);
+            }
+        }
     }
     else { // color == 'b'
         var newCoord = [coord[0]-1, coord[1]];
@@ -578,7 +588,16 @@ function get_pawn_moves(color, bd, coord) {
                 }
             }
         }
-		    //TODO en passant
+		    // en passant
+        if(ep_target != "-") {
+            var en_passant_target_coord = square_to_coord(ep_target);
+            if(coords_equal(en_passant_target_coord, diag_right)) {
+                moves.push(diag_right);
+            }
+            if(coords_equal(en_passant_target_coord, diag_left)) {
+                moves.push(diag_left);
+            }
+        }
     }
 		return moves;
 }
@@ -676,41 +695,9 @@ function get_king_moves(color, bd, coord) {
             lm.push(move);
         }
     }
+    lm = lm.concat(king_castle_moves(bd, coord, color));
 		return lm;
 }
-
-
-//REFACTOR END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function submit_move() {
@@ -833,27 +820,21 @@ function highlight_legal_moves(selectedSquare) {
     var moves = [];
     switch(type) {
         case 'p':
-            //return legal_pawn_moves(coord, color);
-            moves = get_pawn_moves(color, board, coord);
+            moves = get_pawn_moves(color, board, coord, en_passant_target);
             break;
         case 'n':
-            //return legal_knight_moves(coord, color);
             moves = get_knight_moves(color, board, coord);
             break;
         case 'b':
-            //return legal_bishop_moves(coord, color);
             moves = get_bishop_moves(color, board, coord);
             break;
         case 'r':
-            //return legal_rook_moves(coord, color);
             moves = get_rook_moves(color, board, coord);
             break;
         case 'q':
-            //return legal_queen_moves(coord, color);
             moves = get_queen_moves(color, board, coord);
             break;
         case 'k':
-            //return legal_king_moves(coord, color);
             moves = get_king_moves(color, board, coord);
             break;
         default:
@@ -861,17 +842,15 @@ function highlight_legal_moves(selectedSquare) {
             console.log(type);
             break;
     }
-    console.log(moves);
     if (moves.length > 0) {
         for(var i=0; i<moves.length; i++) {
-            //TODO determine if this move would place yourself in check
+            // determine if this move would place yourself in check
             var new_coord = moves[i];
-            if(king_is_in_check(color, board, coord, new_coord)) {
-                continue;
+            if(!king_is_in_check(color, board, coord, new_coord)) {
+                var square = coord_to_square(new_coord);
+                document.getElementById(square).style.backgroundColor = legal_move_color(square);
+                legal_moves.push(square);
             }
-            var square = coord_to_square(new_coord);
-            document.getElementById(square).style.backgroundColor = legal_move_color(square);
-            legal_moves.push(square);
         }
     }
 }
@@ -882,199 +861,24 @@ function coord_to_square(coord) {
 }
 
 //from the given coord, highlight legal pawn moves, for the respective color
-function legal_pawn_moves(coord, color) {
-    if(color == 'w') {
-        var newCoord = [coord[0]+1, coord[1]];
-        //if first square in front is blank 
-        if(board[newCoord[0]][newCoord[1]] == 0) {
-            add_legal_move(newCoord);
-
-            //now check 2 moves in front if on the 2nd row
-            if(coord[0] == 1) {
-                var newCoord2 = [coord[0]+2, coord[1]];
-                if(board[newCoord2[0]][newCoord2[1]] == 0) {
-                    add_legal_move(newCoord2);
-                }
-            } 
-        }
-
-        //can you attack diagonally?
-        diag_right = [coord[0]+1, coord[1]+1];
-        if(diag_right[1] <= 7) {
-            var piece = board[diag_right[0]][diag_right[1]];
-            if(piece != 0) {
-                //if a piece exists and is black
-                if(piece.substring(0,1) == 'b') {
-                    add_legal_move(diag_right);
-                }
-            }
-        }
-        diag_left = [coord[0]+1, coord[1]-1];
-        if(diag_left[1] >= 0) {
-            var piece = board[diag_left[0]][diag_left[1]];
-            if(piece != 0) {
-                //if a piece exists and is black
-                if(piece.substring(0,1) == 'b') {
-                    add_legal_move(diag_left);
-                }
-            }
-        }
-
-        //finally check if an en passant target square is set
-        if(en_passant_target != "-") {
-            var en_passant_target_coord = square_to_coord(en_passant_target);
-            if(coords_equal(en_passant_target_coord, diag_right)) {
-                var from = coord_to_square(coord);
-                //special en passant notation, example: exd6e.p.
-                var notation = from.substring(0,1)+'x'+en_passant_target+'e.p.';
-                special_moves[from+'-'+en_passant_target] = notation;
-                add_legal_move(diag_right);
-            }
-            if(coords_equal(en_passant_target_coord, diag_left)) {
-                var from = coord_to_square(coord);
-                //special en passant notation, example: exd6e.p.
-                var notation = from.substring(0,1)+'x'+en_passant_target+'e.p.';
-                special_moves[from+'-'+en_passant_target] = notation;
-                add_legal_move(diag_left);
-            }
-        }
-        
-
-    }
-    else { // color == 'b'
-    }
-}
-
 function coords_equal(coord1, coord2) {
     return ((coord1[0] == coord2[0]) && (coord1[1] == coord2[1]));
 }
 
-function legal_knight_moves(coord, color) {
+function king_castle_moves(bd, coord, color) {
+    var moves = [];
+    //TODO use the FEN board to know if castling is allowed
     if(color == 'w') {
-        //create an array of coords, based on knight's movement (L shape)
-        var moves = new Array(8); 
-        moves[0] = [coord[0]+2, coord[1]-1];
-        moves[1] = [coord[0]+2, coord[1]+1];
-        moves[2] = [coord[0]-2, coord[1]-1];
-        moves[3] = [coord[0]-2, coord[1]+1];
-        moves[4] = [coord[0]+1, coord[1]-2];
-        moves[5] = [coord[0]+1, coord[1]+2];
-        moves[6] = [coord[0]-1, coord[1]-2];
-        moves[7] = [coord[0]-1, coord[1]+2];
-        //check each move
-        for(var i=0; i<8; i++) {
-            if(white_can_move(moves[i])) {
-                add_legal_move(moves[i]);
-            }
-        }
-    }
-    else { // color == 'b'
-    }
-}
-
-function white_can_move(coord) {
-    //is off board?
-    if(coord[0] < 0 || coord[0] > 7 || coord[1] < 0 || coord[1] > 7) {
-        return false;
-    }
-    //is the square empty?
-    var square = board[coord[0]][coord[1]];
-    if(square == 0) {
-        return true;
-    }
-    else {
-        if(square.substring(0,1) == 'b') {
-            //black piece exists in this square
-            return true;
-        }
-        else {
-            //white piece is already in place here
-            return false;
-        }
-    }
-}
-
-function check_directions(directions, coord, color) {
-    for(var i=0; i<directions.length; i++) {
-        var dir = directions[i];
-        var step = 1;
-        //for each direction, travel until the edge of board or piece
-        while(true) {
-            var move = [coord[0]+(dir[0]*step), coord[1]+(dir[1]*step)];
-            if(white_can_move(move)) {
-                add_legal_move(move);
-                step++;
-                //if move is a black piece, stop calculating on this line
-                var square = board[move[0]][move[1]];
-                if(square != 0 && square.substring(0,1) == 'b') {
-                    break;
-                }
-            }
-            else {
-                break; //can't move here...
-            }
-        }
-    }
-}
-
-function legal_bishop_moves(coord, color) {
-    if(color == 'w') {
-        var directions = [[1,1],[1,-1],[-1,-1],[-1,1]];
-        check_directions(directions, coord, color);
-    }
-    else { // color == 'b'
-    }
-}
-
-
-function legal_rook_moves(coord, color) {
-    if(color == 'w') {
-        var directions = [[1,0],[0,1],[-1,0],[0,-1]];
-        check_directions(directions, coord, color);
-    }
-    else { // color == 'b'
-    }
-}
-
-
-function legal_queen_moves(coord, color) {
-    if(color == 'w') {
-        legal_bishop_moves(coord, color);
-        legal_rook_moves(coord, color);
-    }
-    else { // color == 'b'
-    }
-}
-
-
-function legal_king_moves(coord, color) {
-    if(color == 'w') {
-        var directions = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,-1],[-1,1]];
-        for(var i=0; i<directions.length; i++) {
-            var move = [coord[0]+directions[i][0], coord[1]+directions[i][1]];
-            if(white_can_move(move)) {
-                add_legal_move(move);
-            }
-        }
-        king_castle_moves(coord, color);
-    }
-    else { // color == 'b'
-    }
-}
-
-function king_castle_moves(coord, color) {
-    if(color == 'w') {
-        //TODO use the FEN board to know if castling is allowed
         //for now just assume you can if the king and rook are in original location
         //and there are blank pieces between them
         if(coord[0] == 0 && coord[1] == 4) { //original location of king
-            var kingSideRook = board[0][7];
+            var kingSideRook = bd[0][7];
             if(kingSideRook == 'wr') {
                 //check for blank squares
-                if(board[0][5] == 0 && board[0][6] == 0) {
+                if(bd[0][5] == 0 && bd[0][6] == 0) {
                     //white king can castle on the king side: O-O
                     special_moves[coord_to_square(coord)+'-'+coord_to_square([0,6])] = 'O-O';
-                    add_legal_move([0, 6]);
+                    moves.push([0, 6]);
                 }
             }
             var queenSideRook = board[0][0];
@@ -1083,246 +887,37 @@ function king_castle_moves(coord, color) {
                 if(board[0][1] == 0 && board[0][2] == 0 && board[0][3] == 0) {
                     //white king can castle on the queen side: O-O-O
                     special_moves[coord_to_square(coord)+'-'+coord_to_square([0,2])] = 'O-O-O';
-                    add_legal_move([0, 2]);
+                    moves.push([0, 2]);
                 }
             }
         }
     }
     else { // color == 'b'
+        //for now just assume you can if the king and rook are in original location
+        //and there are blank pieces between them
+        if(coord[0] == 7 && coord[1] == 4) { //original location of king
+            var kingSideRook = bd[7][7];
+            if(kingSideRook == 'br') {
+                //check for blank squares
+                if(bd[7][5] == 0 && bd[7][6] == 0) {
+                    moves.push([7, 6]);
+                }
+            }
+            var queenSideRook = board[0][0];
+            if(queenSideRook == 'br') {
+                //check for blank squares
+                if(board[7][1] == 0 && board[7][2] == 0 && board[7][3] == 0) {
+                    moves.push([7, 2]);
+                }
+            }
+        }
     }
+    return moves;
 }
 
 function legal_move_color(square) {
     var color = square_to_color(square);
     return (color == 'white') ? "#FFFF99" : "#999966";
-}
-
-function is_king_in_check(coord)
-{
-    //from the selected piece and move, check if the white king is in check
-    var from = selectedSquare;
-    //console.log('from='+from);
-    var to = coord_to_square(coord);
-    //console.log('to='+to);
-    var new_board = create_new_board(board, from, to);
-    //console.log('new_board='+new_board);
-
-    king_loc = get_king_location('w', new_board);
-    if(king_loc == null) {
-        return false;
-    }
-    //console.log('king_loc'+king_loc);
-    //is this king in check? i.e. does this location now fall within black's attack squares?
-    //calculate black attack squares
-    black_attack_coords = get_black_attack_coords(new_board);
-    var num_moves = 0;
-    for(var k=0; k<attack_coords.length; k++) {
-        var piece_moves = attack_coords[k].to;
-        num_moves += piece_moves.length;
-        for(i=0; i<piece_moves.length; i++) {
-            //does king loc belong to these attack squares?
-            if(king_loc[0] == piece_moves[i][0] && king_loc[1] == piece_moves[i][1]) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-function get_black_attack_coords(bd) {
-		attack_coords = [];
-    for (var i=0; i<8; i++) {
-        for (var j=0; j<8; j++) {
-            //if this is a black piece
-            if(bd[i][j] != 0 && bd[i][j].substr(0,1) == 'b') {
-                //get legal moves for this piece
-                moves = get_legal_black_moves(bd, [i,j]);
-                //console.log('moves = '+moves);
-                if(moves) {
-                    attack_coords.push(moves);
-                }
-            }
-        }
-    }
-    return attack_coords;
-}
-
-function get_legal_black_moves(bd, coord) {
-    var piece = bd[coord[0]][coord[1]];
-    var color = piece.substring(0,1);
-    var type = piece.substring(1,2);
-    //console.log('type='+type);
-    var moves = [];
-    switch(type) {
-        case 'p':
-            moves = legal_black_pawn_moves(bd, coord);
-            break;
-        case 'n':
-            moves = legal_black_knight_moves(bd, coord);
-            break;
-        case 'b':
-            moves = legal_black_bishop_moves(bd, coord);
-            break;
-        case 'r':
-            moves = legal_black_rook_moves(bd, coord);
-            break;
-        case 'q':
-            moves = legal_black_queen_moves(bd, coord);
-            break;
-        case 'k':
-            moves = legal_black_king_moves(bd, coord);
-            break;
-        default:
-            console.log('default case');
-            console.log(type);
-            break;
-    }
-    if (moves.length > 0) {
-        return {'type':type, 'from':coord,'to':moves};
-    }
-    else {
-        return null;
-    }
-}
-function legal_black_pawn_moves(bd, coord) {
-		var moves = [];
-    var newCoord = [coord[0]-1, coord[1]];
-    //if first square below blank?
-    if(bd[newCoord[0]][newCoord[1]] == 0) {
-        moves.push(newCoord);
-
-        //now check 2 moves below if on the 7th row (6 on the board)
-        if(coord[0] == 6) {
-            var newCoord2 = [coord[0]-2, coord[1]];
-            if(bd[newCoord2[0]][newCoord2[1]] == 0) {
-                moves.push(newCoord2);
-            }
-        } 
-    }
-
-    //can you attack diagonally?
-    diag_right = [coord[0]-1, coord[1]+1];
-    if(diag_right[1] <= 7) {
-        var piece = bd[diag_right[0]][diag_right[1]];
-        if(piece != 0) {
-            //if a piece exists and is white
-            if(piece.substring(0,1) == 'w') {
-                moves.push(diag_right);
-            }
-        }
-    }
-    diag_left = [coord[0]-1, coord[1]-1];
-    if(diag_left[1] >= 0) {
-        var piece = bd[diag_left[0]][diag_left[1]];
-        if(piece != 0) {
-            //if a piece exists and is white
-            if(piece.substring(0,1) == 'w') {
-                moves.push(diag_left);
-            }
-        }
-    }
-		//TODO en passant
-		return moves;
-}
-
-function legal_black_knight_moves(bd, coord) {
-    //create an array of coords, based on knight's movement (L shape)
-    //console.log('legal_black_knight_moves(coord='+coord);
-    var moves = new Array(8); 
-    moves[0] = [coord[0]+2, coord[1]-1];
-    moves[1] = [coord[0]+2, coord[1]+1];
-    moves[2] = [coord[0]-2, coord[1]-1];
-    moves[3] = [coord[0]-2, coord[1]+1];
-    moves[4] = [coord[0]+1, coord[1]-2];
-    moves[5] = [coord[0]+1, coord[1]+2];
-    moves[6] = [coord[0]-1, coord[1]-2];
-    moves[7] = [coord[0]-1, coord[1]+2];
-    //check each move
-		lm = [];
-    for(var i=0; i<8; i++) {
-        if(black_can_move(bd, moves[i])) {
-            lm.push(moves[i]);
-        }
-    }
-		return lm;
-}
-
-function black_can_move(bd, coord) {
-		//console.log('black_can_move(bd='+bd+',coord='+coord+')');
-    //is off board?
-    if(coord[0] < 0 || coord[0] > 7 || coord[1] < 0 || coord[1] > 7) {
-        return false;
-    }
-    //is the square empty?
-    var square = bd[coord[0]][coord[1]];
-    if(square == 0) {
-        return true;
-    }
-    else {
-        if(square.substring(0,1) == 'w') {
-            //white piece exists in this square
-            return true;
-        }
-        else {
-            //black piece is already in place here
-            return false;
-        }
-    }
-}
-function get_legal_black_moves_from_directions(bd, directions, coord) {
-		lm = [];
-    for(var i=0; i<directions.length; i++) {
-        var dir = directions[i];
-        var step = 1;
-        //for each direction, travel until the edge of board or piece
-        while(true) {
-            var move = [coord[0]+(dir[0]*step), coord[1]+(dir[1]*step)];
-            //console.log(move);
-            if(black_can_move(bd, move)) {
-                lm.push(move);
-                step++;
-                //if move is a white piece, stop calculating on this line
-                var square = bd[move[0]][move[1]];
-                if(square != 0 && square.substring(0,1) == 'w') {
-                    break;
-                }
-            }
-            else {
-                break; //can't move here...
-            }
-        }
-    }
-		return lm;
-}
-
-function legal_black_bishop_moves(bd, coord) {
-    var directions = [[1,1],[1,-1],[-1,-1],[-1,1]];
-    return get_legal_black_moves_from_directions(bd, directions, coord);
-}
-
-
-function legal_black_rook_moves(bd, coord) {
-    var directions = [[1,0],[0,1],[-1,0],[0,-1]];
-    return get_legal_black_moves_from_directions(bd, directions, coord);
-}
-
-
-function legal_black_queen_moves(bd, coord) {
-		lm = legal_black_bishop_moves(bd, coord);
-		return lm.concat(legal_black_rook_moves(bd, coord));
-}
-
-
-function legal_black_king_moves(bd, coord) {
-	  var lm = [];
-    var directions = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,-1],[-1,1]];
-    for(var i=0; i<directions.length; i++) {
-        var move = [coord[0]+directions[i][0], coord[1]+directions[i][1]];
-        if(black_can_move(bd, move)) {
-            lm.push(move);
-        }
-    }
-		return lm;
 }
 
 
@@ -1337,16 +932,6 @@ function get_king_location(color, bd) {
 		return null; //error king should always be present on the board
 }
 
-//highlight the legal move on the board for this coord and track in global array
-function add_legal_move(coord) {
-    //validate this move doesn't place them in check
-    if(is_king_in_check(coord)) {
-        return;
-    }
-    var square = coord_to_square(coord);
-    document.getElementById(square).style.backgroundColor = legal_move_color(square);
-    legal_moves.push(square);
-}
 
 function clear_legal_moves() {
     for(var i=0; i<legal_moves.length; i++) {
@@ -1356,8 +941,8 @@ function clear_legal_moves() {
     legal_moves = [];
 }
 
-function update_history(player, move, formattedMove)
-{
+
+function update_history(player, move, formattedMove) {
     var table = document.getElementById('move_history_table');
     if(!table) {
         return;
@@ -1385,6 +970,7 @@ function update_history(player, move, formattedMove)
     set_highlighted_move(move)
 }
 
+
 function clear_highlighted_move() {
     if(!highlighted_move) {
         return;
@@ -1394,6 +980,7 @@ function clear_highlighted_move() {
     document.getElementById(squares[1]).style.border = 'none';
 }
 
+
 function set_highlighted_move(move) {
     clear_highlighted_move()
     highlighted_move = move;
@@ -1401,6 +988,7 @@ function set_highlighted_move(move) {
     document.getElementById(squares[0]).style.border = '#666666 solid 3px';
     document.getElementById(squares[1]).style.border = '#999999 solid 3px';
 }
+
 
 //return a string representing the FEN record for the current board 
 //http://en.wikipedia.org/wiki/Forsyth-Edwards_Notation
@@ -1419,7 +1007,7 @@ function calculate_fen(active_color, from, to) {
     //3. Castling availability.
     fen += fen_castling_availability(fen_board, from, to) + " ";
     //4. En passant target square in algebraic notation
-    target = fen_en_passant_target(from, to);
+    target = fen_en_passant_target(board, from, to);
     if(active_color == 'w') {
         //cache the target square from black
         en_passant_target = target;
@@ -1430,7 +1018,6 @@ function calculate_fen(active_color, from, to) {
     //6. Fullmove number
     fen += fen_fullmove_number();
 
-    console.log(fen);
     document.getElementById('fen_record').value = fen;
 }
 
@@ -1474,6 +1061,7 @@ function perform_special_moves(bd, from, to) {
                     bd[remove_coord[0]][remove_coord[1]] = 0;
                 }
                 break;
+            //TODO implement pawn promotions... for now just assume pawn-->queen
         }
     }
     return bd;
@@ -1548,10 +1136,10 @@ function fen_castling_availability(fen_board, from, to) {
 }
 
 //En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a two-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
-function fen_en_passant_target(from, to) {
+function fen_en_passant_target(bd, from, to) {
     var old_coord = square_to_coord(from);
     var new_coord = square_to_coord(to);
-    var piece = board[old_coord[0]][old_coord[1]];
+    var piece = bd[old_coord[0]][old_coord[1]];
     target = "-";
     if(piece == 'wp') {
         //white pawn on initial row and moved 2 spaces
