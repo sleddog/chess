@@ -830,29 +830,49 @@ function highlight_legal_moves(selectedSquare) {
     var piece = board[coord[0]][coord[1]];
     var color = piece.substring(0,1);
     var type = piece.substring(1,2);
+    var moves = [];
     switch(type) {
         case 'p':
-            return legal_pawn_moves(coord, color);
+            //return legal_pawn_moves(coord, color);
+            moves = get_pawn_moves(color, board, coord);
             break;
         case 'n':
-            return legal_knight_moves(coord, color);
+            //return legal_knight_moves(coord, color);
+            moves = get_knight_moves(color, board, coord);
             break;
         case 'b':
-            return legal_bishop_moves(coord, color);
+            //return legal_bishop_moves(coord, color);
+            moves = get_bishop_moves(color, board, coord);
             break;
         case 'r':
-            return legal_rook_moves(coord, color);
+            //return legal_rook_moves(coord, color);
+            moves = get_rook_moves(color, board, coord);
             break;
         case 'q':
-            return legal_queen_moves(coord, color);
+            //return legal_queen_moves(coord, color);
+            moves = get_queen_moves(color, board, coord);
             break;
         case 'k':
-            return legal_king_moves(coord, color);
+            //return legal_king_moves(coord, color);
+            moves = get_king_moves(color, board, coord);
             break;
         default:
             console.log('default case');
             console.log(type);
             break;
+    }
+    console.log(moves);
+    if (moves.length > 0) {
+        for(var i=0; i<moves.length; i++) {
+            //TODO determine if this move would place yourself in check
+            var new_coord = moves[i];
+            if(king_is_in_check(color, board, coord, new_coord)) {
+                continue;
+            }
+            var square = coord_to_square(new_coord);
+            document.getElementById(square).style.backgroundColor = legal_move_color(square);
+            legal_moves.push(square);
+        }
     }
 }
 
