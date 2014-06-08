@@ -184,12 +184,23 @@ else {
 open source chess application<br />
 on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
+
+<div id='promotion_selection' style='display:none'>
+<b>Promote Pawn:</b><br />
+<? foreach(array("n","b","r","q") as $type) { ?>
+<button class="btn btn-default" id="promote_<?=$type;?>" type="button" style="width: 26px; height: 26px; font-size: 18px; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px; border: 1px solid black; background-color: <?= $type=='q' ? 'lightgreen' : 'white' ?>; padding: 0px; " onclick="promotion_select(this)"><?=$pieces['w'.$type]['html'];?></button>
+<? } ?>
+<br />
+<hr />
+</div>
+
 <div id='submit_move_div'>
 <input type='text' class='input-sm' style='width:45px' id='piece_from' readonly="true" />
 <span>-</span>
 <input type='text' class='input-sm' style='width:45px' id='piece_to' readonly="true" />
 <input class='btn btn-default' id='submit_move_button' type='button' value='Submit Move' onclick='submit_move()' disabled='true'/>
 </div>
+
 <hr />
 <table id='move_history_table' width='180'>
 <tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
@@ -219,6 +230,7 @@ var halfmove_clock = 0;
 var fullmove_number = 1;
 var special_moves = {};
 var en_passant_target = "<?=$en_passant_target;?>";
+var promotion_choice = 'q';  // by default assume queen is desired promotion
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -250,7 +262,6 @@ function init_board(board_json) {
             }
         }
     }
-    //console.log(board);
     //print_board_to_console(board);
 }
 
@@ -319,6 +330,7 @@ function square_select(button) {
                 button.style.border = "darkred solid 4px";
                 targetSquare = button.id;
                 enable_submit_move();
+                handle_pawn_promotion(board, selectedSquare, targetSquare);
             }
         }
     }
@@ -340,6 +352,7 @@ function reset_target_square() {
     targetSquare = 0;
     document.getElementById('piece_to').value = '';
     document.getElementById('submit_move_button').disabled = true;
+    toggle_promote_pawn(false);
 }
 
 function enable_submit_move() {
@@ -350,7 +363,7 @@ function enable_submit_move() {
 
 // build a string representing the move in algebraic notation
 // http://en.wikipedia.org/wiki/Algebraic_notation_(chess)
-function format_move(next_move, color) 
+function format_move(next_move, color, promotion_choice) 
 {
     //split next_move into individual squares
     var moves = next_move.split('-');
@@ -390,14 +403,21 @@ function format_move(next_move, color)
             formattedMove = 'K'
             break;
         default:
-            console.log('default case');
-            console.log(type);
             break;
     }
     if(attack) {
         formattedMove += "x";
     }
     formattedMove += to;
+
+    //rebuild formattedMove for promotions
+    if(promotion_choice) {
+        formattedMove = "";
+        if(attack) {
+            formattedMove = from.substring(0,1) + "x";
+        }
+        formattedMove += to + "=" + promotion_choice;
+    }
 
     // determine if the opposite king is in check
     if(king_is_in_check(opposite_color(color), board, old_coord, new_coord)) {
@@ -460,7 +480,6 @@ function get_attack_coords(bd, color, ep_target) {
 function get_legal_moves(color, bd, coord, ep_target) {
     var piece = bd[coord[0]][coord[1]];
     var type = piece.substring(1,2);
-    //console.log('type='+type);
     var moves = [];
     switch(type) {
         case 'p':
@@ -482,8 +501,6 @@ function get_legal_moves(color, bd, coord, ep_target) {
             moves = get_king_moves(color, bd, coord);
             break;
         default:
-            console.log('default case');
-            console.log(type);
             break;
     }
     if (moves.length > 0) {
@@ -599,6 +616,15 @@ function get_pawn_moves(color, bd, coord, ep_target) {
             }
         }
     }
+    //check if any of these pawn moves are promotions
+    for(var i=0; i<moves.length; i++) {
+        if(color == 'w' && moves[i][0] == 7) {
+            special_moves[coord_to_square(coord)+'-'+coord_to_square(moves[i])] = '=';
+        }
+        else if(color == 'b' && moves[i][0] == 0) {
+            //TODO?
+        }
+    }
 		return moves;
 }
 
@@ -650,7 +676,6 @@ function get_legal_moves_from_directions(color, bd, directions, coord) {
         //for each direction, travel until the edge of board or piece
         while(true) {
             var move = [coord[0]+(dir[0]*step), coord[1]+(dir[1]*step)];
-            //console.log(move);
             if(get_can_move(color, bd, move)) {
                 lm.push(move);
                 step++;
@@ -721,6 +746,14 @@ function submit_move() {
                 //move the rook from a1 to cd
                 move_pieces('a1', 'd1');
                 break;
+            case '=':
+                //pawn promotion
+                var promotedCoord = square_to_coord(selectedSquare);
+                var promotedPiece = 'w'+promotion_choice;
+                board[promotedCoord[0]][promotedCoord[1]] = promotedPiece;
+                formattedMove = format_move(selectedMove, 'w', promotion_choice.toUpperCase());
+                document.getElementById(targetSquare).innerHTML = piece_to_html(promotedPiece);
+                break;
             default: 
                 //en passant example notation = 'exd6e.p.'    
                 if(special_move.substring(4,8) == "e.p.") {
@@ -764,7 +797,6 @@ function get_move_from_server(selectedMove) {
     move: selectedMove //"e2-e4" this will be a legal chess move
   })
     .done(function( data ) {
-        //console.log(data);
         if(data['next-move']) {
             make_move(data['next-move']);
         }
@@ -838,8 +870,6 @@ function highlight_legal_moves(selectedSquare) {
             moves = get_king_moves(color, board, coord);
             break;
         default:
-            console.log('default case');
-            console.log(type);
             break;
     }
     if (moves.length > 0) {
@@ -1182,6 +1212,47 @@ function open_fen_in_new_tab() {
 function open_random_in_new_tab() {
     var rand_amount = document.getElementById('rand_amount').value;
     window.open('/chess/?random=True&blank_chance='+parseInt(rand_amount), '_blank');
+}
+
+
+function handle_pawn_promotion(bd, from, to) {
+    //determine if this piece is a pawn in the act of promoting (reach last rank)
+    var old_coord = square_to_coord(from);
+    var fromPiece = bd[old_coord[0]][old_coord[1]];
+    var color = fromPiece.substring(0,1);
+    var pieceType = fromPiece.substring(1,2);
+    if(pieceType != 'p') {
+        return;
+    }
+
+    var new_coord = square_to_coord(to);
+    if(color == 'w' && new_coord[0] == 7) {
+        // white pawn is promoting
+        toggle_promote_pawn(true);
+    }
+    else if(color =='b' && new_coord[0] == 0){
+        // black pawn is promoting... TODO?
+    }
+}
+
+
+function toggle_promote_pawn(shouldDisplay) {
+    var d = document.getElementById('promotion_selection');
+    if(shouldDisplay) {
+        d.style.display = 'inline';
+        // by default reset pawn promotion to queen (very very rarely would one underpromote)
+        promotion_select(document.getElementById('promote_q'));
+    }
+    else {
+        d.style.display = 'none';
+    }
+}
+
+function promotion_select(button) {
+    var type = button.id.substring(button.id.length - 1);
+    document.getElementById('promote_'+promotion_choice).style.backgroundColor = 'white';
+    button.style.backgroundColor = 'lightgreen';
+    promotion_choice = type;
 }
 
 //onload
