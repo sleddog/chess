@@ -15,8 +15,6 @@ var pieces = make(map[string]map[string]string)
 var initial_board_json string
 
 func init() {
-	//fmt.Println("Inside init()")
-
 	//set the random seed
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -34,7 +32,6 @@ func init() {
 		"bb": {"html": "&#9821;", "codepoint": "\u265D"},
 		"bn": {"html": "&#9822;", "codepoint": "\u265E"},
 		"bp": {"html": "&#9823;", "codepoint": "\u265F"}}
-	//fmt.Println("pieces = ", pieces)
 
 	//set the initial_board_json
 	initial_board_json = "{\"a8\":\"br\",\"b8\":\"bn\",\"c8\":\"bb\",\"d8\":\"bq\",\"e8\":\"bk\",\"f8\":\"bb\",\"g8\":\"bn\",\"h8\":\"br\",\"a7\":\"bp\",\"b7\":\"bp\",\"c7\":\"bp\",\"d7\":\"bp\",\"e7\":\"bp\",\"f7\":\"bp\",\"g7\":\"bp\",\"h7\":\"bp\",\"a2\":\"wp\",\"b2\":\"wp\",\"c2\":\"wp\",\"d2\":\"wp\",\"e2\":\"wp\",\"f2\":\"wp\",\"g2\":\"wp\",\"h2\":\"wp\",\"a1\":\"wr\",\"b1\":\"wn\",\"c1\":\"wb\",\"d1\":\"wq\",\"e1\":\"wk\",\"f1\":\"wb\",\"g1\":\"wn\",\"h1\":\"wr\"}"
@@ -123,25 +120,26 @@ func GetNextMoveUsingPointValue(dat []string) string {
 	node := createChessNodeUsingArray(dat)
 	//printNode(node)
 
-	originalPoints := calculatePointValue("b", node)
-	fmt.Println("originalPoints = ", originalPoints)
-
 	if len(node.black_legal_moves) > 0 {
 		for i := 0; i < len(node.black_legal_moves); i++ {
-			fmt.Println("legal move[", i, "]=", node.black_legal_moves[i])
 			newNode := makeMove(node, node.black_legal_moves[i])
-			materialValue := calculatePointValue("b", newNode)
-			fmt.Println("stat[", i, "]=", materialValue)
+			materialValue := calculatePointValue("w", newNode)
 			node.black_legal_moves[i].value = materialValue
 		}
 
 		moves := node.black_legal_moves
-		fmt.Println("moves prior to sort = ", moves)
 		sort.Sort(ByMaterialValue(moves))
-		fmt.Println("moves after sort = ", moves)
 
-		//after sorting, choose the last move (should have the highest value)
-		move = formatNextMove(moves[len(moves)-1])
+		//after sorting, choose a random move that has the same minimum score
+    minMove := moves[0]
+    var j int
+    for j=0; j<len(moves); j++ {
+        if moves[j].value > minMove.value {
+            break
+        }
+    }
+		randMove := node.black_legal_moves[rand.Intn(j)]
+		move = formatNextMove(randMove)
 
 		//randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
 		//move = formatNextMove(randMove)
@@ -205,17 +203,14 @@ func createBoardUsingFen(fen string) [8][8]string {
 	for i := 0; i < len(rows); i++ {
 		currentCol := 1
 		row := rows[i]
-		fmt.Println("row = ", row)
 		for j := 0; j < len(row); j++ {
 			char := string(row[j])
-			fmt.Println("char = ", char)
 			if intval, err := strconv.Atoi(char); err == nil {
 				step = intval
 			} else { //add the piece
 				l := numberToLetter(currentCol - 1)
 				square := l + strconv.Itoa(currentRow)
 				piece := convertFenPiece(char)
-				fmt.Println("piece = ", piece)
 				boardMap[square] = piece
 				step = 1
 			}
@@ -286,17 +281,14 @@ func getLegalBlackMoves(node ChessNode) []Move {
 	for row := 7; row >= 0; row-- {
 		for col := 0; col < 8; col++ {
 			piece := board[row][col]
-			//fmt.Println("piece=", piece)
 			if piece == "0" {
 				continue
 			} else if piece[0:1] == "b" {
 				//found a black piece
-				//fmt.Println("black piece = ", piece, ", row=", row, "col=", col)
 				black_moves = append(black_moves, getMovesForBlackPiece(piece, row, col, node)...)
 			}
 		}
 	}
-	//fmt.Println("# of legal black_moves = ", len(black_moves))
 	return black_moves
 }
 
@@ -315,7 +307,6 @@ func getMovesForBlackPiece(piece string, row int, col int, node ChessNode) []Mov
 	case "q":
 		moves = append(moves, getMovesForBlackQueen(piece, row, col, node)...)
 	default:
-		//fmt.Println("DEFAULT = ", piece)
 	}
 	return moves
 }
@@ -468,7 +459,6 @@ func calculatePointValue(color string, node ChessNode) int {
 	for row := 7; row >= 0; row-- {
 		for col := 0; col < 8; col++ {
 			piece := board[row][col]
-			//fmt.Println("piece=", piece)
 			if piece == "0" {
 				continue
 			} else if piece[0:1] == color {
@@ -496,16 +486,10 @@ func pieceValue(piece_type string) int {
 	}
 }
 
+//apply the move to the supplied chess node
 func makeMove(node ChessNode, move Move) ChessNode {
-	fmt.Println("makeMove(move=", move, ")")
-	//apply the move to the supplied chess node
-	fmt.Println("move.from=", move.from)
-	fmt.Println("move.to=", move.to)
 	board := node.board
-	fmt.Println("from square=", board[move.from.row][move.from.col])
-	fmt.Println("to square=", board[move.to.row][move.to.col])
 	piece := board[move.from.row][move.from.col]
-	fmt.Println("piece = ", piece)
 	board[move.from.row][move.from.col] = "0"
 	board[move.to.row][move.to.col] = piece
 	node.board = board
