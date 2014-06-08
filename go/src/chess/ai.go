@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -50,6 +51,7 @@ type Move struct {
 	from  Coord
 	to    Coord
 	piece string
+	value int
 }
 
 type Coord struct {
@@ -108,6 +110,41 @@ func GetNextMoveUsingArray(dat []string) string {
 	if len(node.black_legal_moves) > 0 {
 		randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
 		move = formatNextMove(randMove)
+	}
+
+	return move
+}
+
+//prototype #3 - calculate the point value of each piece and choose
+// the move that maximizes the total points on the board
+func GetNextMoveUsingPointValue(dat []string) string {
+	var move string
+
+	node := createChessNodeUsingArray(dat)
+	//printNode(node)
+
+	originalPoints := calculatePointValue("b", node)
+	fmt.Println("originalPoints = ", originalPoints)
+
+	if len(node.black_legal_moves) > 0 {
+		for i := 0; i < len(node.black_legal_moves); i++ {
+			fmt.Println("legal move[", i, "]=", node.black_legal_moves[i])
+			newNode := makeMove(node, node.black_legal_moves[i])
+			materialValue := calculatePointValue("b", newNode)
+			fmt.Println("stat[", i, "]=", materialValue)
+			node.black_legal_moves[i].value = materialValue
+		}
+
+		moves := node.black_legal_moves
+		fmt.Println("moves prior to sort = ", moves)
+		sort.Sort(ByMaterialValue(moves))
+		fmt.Println("moves after sort = ", moves)
+
+		//after sorting, choose the last move (should have the highest value)
+		move = formatNextMove(moves[len(moves)-1])
+
+		//randMove := node.black_legal_moves[rand.Intn(len(node.black_legal_moves))]
+		//move = formatNextMove(randMove)
 	}
 
 	return move
@@ -423,3 +460,60 @@ func getMovesForBlackQueen(piece string, row int, col int, node ChessNode) []Mov
 	moves = append(moves, getMovesForBlackRook(piece, row, col, node)...)
 	return moves
 }
+
+func calculatePointValue(color string, node ChessNode) int {
+	//sum up the point values of all of the chess pieces for this color
+	sum := 0
+	board := node.board
+	for row := 7; row >= 0; row-- {
+		for col := 0; col < 8; col++ {
+			piece := board[row][col]
+			//fmt.Println("piece=", piece)
+			if piece == "0" {
+				continue
+			} else if piece[0:1] == color {
+				sum = sum + pieceValue(piece[1:2])
+			}
+		}
+	}
+	return sum
+}
+
+func pieceValue(piece_type string) int {
+	switch piece_type {
+	case "p":
+		return 1
+	case "n":
+		return 3
+	case "b":
+		return 3
+	case "r":
+		return 5
+	case "q":
+		return 9
+	default:
+		return 0
+	}
+}
+
+func makeMove(node ChessNode, move Move) ChessNode {
+	fmt.Println("makeMove(move=", move, ")")
+	//apply the move to the supplied chess node
+	fmt.Println("move.from=", move.from)
+	fmt.Println("move.to=", move.to)
+	board := node.board
+	fmt.Println("from square=", board[move.from.row][move.from.col])
+	fmt.Println("to square=", board[move.to.row][move.to.col])
+	piece := board[move.from.row][move.from.col]
+	fmt.Println("piece = ", piece)
+	board[move.from.row][move.from.col] = "0"
+	board[move.to.row][move.to.col] = piece
+	node.board = board
+	return node
+}
+
+type ByMaterialValue []Move
+
+func (a ByMaterialValue) Len() int           { return len(a) }
+func (a ByMaterialValue) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByMaterialValue) Less(i, j int) bool { return a[i].value < a[j].value }
