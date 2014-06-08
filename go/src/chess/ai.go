@@ -131,13 +131,13 @@ func GetNextMoveUsingPointValue(dat []string) string {
 		sort.Sort(ByMaterialValue(moves))
 
 		//after sorting, choose a random move that has the same minimum score
-    minMove := moves[0]
-    var j int
-    for j=0; j<len(moves); j++ {
-        if moves[j].value > minMove.value {
-            break
-        }
-    }
+		minMove := moves[0]
+		var j int
+		for j = 0; j < len(moves); j++ {
+			if moves[j].value > minMove.value {
+				break
+			}
+		}
 		randMove := node.black_legal_moves[rand.Intn(j)]
 		move = formatNextMove(randMove)
 
