@@ -180,7 +180,7 @@ else {
 </div>
 </td>
 <td valign=top style='padding:10px'>
-<b>Chess by Devin Gray</b><br />
+<b><a href='http://www.devingray.com/chess'>Chess by Devin Gray</a></b><br />
 open source chess application<br />
 on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
