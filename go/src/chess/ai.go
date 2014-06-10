@@ -37,25 +37,6 @@ func init() {
 	initial_board_json = "{\"a8\":\"br\",\"b8\":\"bn\",\"c8\":\"bb\",\"d8\":\"bq\",\"e8\":\"bk\",\"f8\":\"bb\",\"g8\":\"bn\",\"h8\":\"br\",\"a7\":\"bp\",\"b7\":\"bp\",\"c7\":\"bp\",\"d7\":\"bp\",\"e7\":\"bp\",\"f7\":\"bp\",\"g7\":\"bp\",\"h7\":\"bp\",\"a2\":\"wp\",\"b2\":\"wp\",\"c2\":\"wp\",\"d2\":\"wp\",\"e2\":\"wp\",\"f2\":\"wp\",\"g2\":\"wp\",\"h2\":\"wp\",\"a1\":\"wr\",\"b1\":\"wn\",\"c1\":\"wb\",\"d1\":\"wq\",\"e1\":\"wk\",\"f1\":\"wb\",\"g1\":\"wn\",\"h1\":\"wr\"}"
 }
 
-//struct to hold all data about a particular board
-type ChessNode struct {
-	board             [8][8]string
-	white_legal_moves []Move
-	black_legal_moves []Move
-}
-
-type Move struct {
-	from  Coord
-	to    Coord
-	piece string
-	value int
-}
-
-type Coord struct {
-	row int
-	col int
-}
-
 func formatNextMove(move Move) string {
 	columns := "abcdefgh"
 	fromSquare := string(columns[move.from.col]) + strconv.Itoa(move.from.row+1)
@@ -78,7 +59,7 @@ func createChessNodeUsingMap(dat map[string]string) ChessNode {
 
 func createChessNodeUsingArray(dat []string) ChessNode {
 	node := ChessNode{board: createBoardUsingArray(dat)}
-	node.black_legal_moves = getLegalBlackMoves(node)
+	node.black_legal_moves = getMoves("b", node.board)
 	return node
 }
 
