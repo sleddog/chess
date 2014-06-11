@@ -230,7 +230,7 @@ func opposite(color string) string {
 //apply the move to the board and determine if the king is in check
 func kingIsInCheck(color string, board [8][8]string, move Move) bool {
 	newBoard := makeMove(board, move)
-	kingLoc := getKingLocation(color, board)
+	kingLoc := getKingLocation(color, newBoard)
 	if kingLoc.row == -1 || kingLoc.col == -1 {
 		return false //shouldn't be possible...
 	}

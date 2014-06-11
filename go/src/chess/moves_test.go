@@ -40,3 +40,13 @@ func TestF7PawnShouldNotMove(t *testing.T) {
 	node := ChessNode{board: board}
 	node.black_legal_moves = getLegalMoves("b", node.board)
 }
+
+func TestKingShouldNotKillQueen(t *testing.T) {
+	fenPlacement := "rnb1k2r/ppqppQ1p/7b/2p5/2B1P3/3P4/PPP2PPP/RN2K1NR"
+	fmt.Println("fen = ", fenPlacement)
+	board := createBoardUsingFen(fenPlacement)
+	node := ChessNode{board: board}
+	node.black_legal_moves = getLegalMoves("b", node.board)
+	fmt.Println("# moves = ", len(node.black_legal_moves))
+	fmt.Println(node.black_legal_moves)
+}
