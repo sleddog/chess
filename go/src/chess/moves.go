@@ -1,5 +1,17 @@
 package chess
 
+func getLegalMoves(color string, board [8][8]string) []Move {
+	moves := getMoves(color, board)
+	var legal_moves []Move
+	for i := 0; i < len(moves); i++ {
+		//determine if this move would place the king in check
+		if !kingIsInCheck(color, board, moves[i]) {
+			legal_moves = append(legal_moves, moves[i])
+		}
+	}
+	return legal_moves
+}
+
 func getMoves(color string, board [8][8]string) []Move {
 	var moves []Move
 	for row := 7; row >= 0; row-- {
@@ -213,4 +225,57 @@ func opposite(color string) string {
 	} else {
 		return "b"
 	}
+}
+
+//apply the move to the board and determine if the king is in check
+func kingIsInCheck(color string, board [8][8]string, move Move) bool {
+	newBoard := makeMove(board, move)
+	kingLoc := getKingLocation(color, board)
+	if kingLoc.row == -1 || kingLoc.col == -1 {
+		return false //shouldn't be possible...
+	}
+	attackCoords := getAttackCoords(newBoard, opposite(color))
+	for i := 0; i < len(attackCoords); i++ {
+		//does king loc belong to this attack coords?
+		if kingLoc.col == attackCoords[i].col && kingLoc.row == attackCoords[i].row {
+			return true
+		}
+	}
+	return false
+}
+
+//apply the move to the supplied chess board
+func makeMove(board [8][8]string, move Move) [8][8]string {
+	piece := board[move.from.row][move.from.col]
+	board[move.from.row][move.from.col] = "0"
+	board[move.to.row][move.to.col] = piece
+	return board
+}
+
+func getKingLocation(color string, board [8][8]string) Coord {
+	for row := 7; row >= 0; row-- {
+		for col := 0; col < 8; col++ {
+			piece := board[row][col]
+			if piece == color+"k" {
+				return Coord{row: row, col: col}
+			}
+		}
+	}
+	return Coord{row: -1, col: -1}
+}
+
+func getAttackCoords(board [8][8]string, color string) []Coord {
+	var attackCoords []Coord
+	for row := 7; row >= 0; row-- {
+		for col := 0; col < 8; col++ {
+			piece := board[row][col]
+			if piece != "0" && piece[0:1] == color {
+				moves := getMoves(color, board)
+				for i := 0; i < len(moves); i++ {
+					attackCoords = append(attackCoords, moves[i].to)
+				}
+			}
+		}
+	}
+	return attackCoords
 }

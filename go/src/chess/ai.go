@@ -21,8 +21,8 @@ func GetNextMoveUsingPointValue(dat []string) string {
 
 	if len(node.black_legal_moves) > 0 {
 		for i := 0; i < len(node.black_legal_moves); i++ {
-			newNode := makeMove(node, node.black_legal_moves[i])
-			materialValue := calculatePointValue("w", newNode)
+			newBoard := makeMove(node.board, node.black_legal_moves[i])
+			materialValue := calculatePointValue("w", newBoard)
 			node.black_legal_moves[i].value = materialValue
 		}
 
@@ -83,10 +83,9 @@ func formatNextMove(move Move) string {
 	return nextMove
 }
 
-func calculatePointValue(color string, node ChessNode) int {
+func calculatePointValue(color string, board [8][8]string) int {
 	//sum up the point values of all of the chess pieces for this color
 	sum := 0
-	board := node.board
 	for row := 7; row >= 0; row-- {
 		for col := 0; col < 8; col++ {
 			piece := board[row][col]
@@ -115,16 +114,6 @@ func pieceValue(piece_type string) int {
 	default:
 		return 0
 	}
-}
-
-//apply the move to the supplied chess node
-func makeMove(node ChessNode, move Move) ChessNode {
-	board := node.board
-	piece := board[move.from.row][move.from.col]
-	board[move.from.row][move.from.col] = "0"
-	board[move.to.row][move.to.col] = piece
-	node.board = board
-	return node
 }
 
 type ByMaterialValue []Move

@@ -44,6 +44,6 @@ func TestMakeMove(t *testing.T) {
 	node := ChessNode{board: board}
 	node.black_legal_moves = getMoves("b", node.board)
 
-	node2 := makeMove(node, node.black_legal_moves[0])
-	fmt.Println("node2=", node2)
+	board2 := makeMove(node.board, node.black_legal_moves[0])
+	fmt.Println("board2=", board2)
 }
