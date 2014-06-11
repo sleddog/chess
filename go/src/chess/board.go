@@ -9,7 +9,7 @@ import (
 
 func createChessNodeUsingArray(dat []string) ChessNode {
 	node := ChessNode{board: createBoardUsingArray(dat)}
-	node.black_legal_moves = getMoves("b", node.board)
+	node.black_legal_moves = getLegalMoves("b", node.board)
 	return node
 }
 
