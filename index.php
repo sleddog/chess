@@ -420,15 +420,31 @@ function format_move(next_move, color, promotion_choice)
     }
 
     // determine if the opposite king is in check
-    if(king_is_in_check(opposite_color(color), board, old_coord, new_coord)) {
+    king_in_check = king_is_in_check(opposite(color), board, old_coord, new_coord)
+    if(king_in_check) {
         formattedMove = formattedMove + "+";
     }
     //TODO determine if the game is over... i.e. checkmate
+    gameOver = is_game_over(opposite(color), board);
+    console.log('gameOver = ' + gameOver);
+    if(gameOver) {
+        formattedMove += "++";
+    }
+    
     return formattedMove;
 }
 
+function is_game_over(color, bd) {
+    var lm = get_all_legal_moves(color, bd, en_passant_target);
+    console.log('is_game_over');
+    console.log(lm);
+    if(lm.length == 0) {
+        return true;
+    }
+    return false;
+}
 
-function opposite_color(color) {
+function opposite(color) {
     return (color == 'w') ? 'b' : 'w';
 }
 
@@ -444,7 +460,7 @@ function king_is_in_check(color, bd, old_coord, new_coord) {
     }
     //is this king in check? i.e. does this location now fall within the opposite color's attack squares?
     //calculate attack squares
-    attack_coords = get_attack_coords(new_board, opposite_color(color), ep_target);
+    attack_coords = get_attack_coords(new_board, opposite(color), ep_target);
     var num_moves = 0;
     for(var k=0; k<attack_coords.length; k++) {
         var piece_moves = attack_coords[k].to;
@@ -465,8 +481,8 @@ function get_attack_coords(bd, color, ep_target) {
     for (var i=0; i<8; i++) {
         for (var j=0; j<8; j++) {
             if(bd[i][j] != 0 && bd[i][j].substr(0,1) == color) {
-                //get legal moves for this piece
-                moves = get_legal_moves(color, bd, [i,j], ep_target);
+                //get moves for this piece
+                moves = get_moves(color, bd, [i,j], ep_target);
                 if(moves) {
                     attack_coords.push(moves);
                 }
@@ -477,7 +493,7 @@ function get_attack_coords(bd, color, ep_target) {
 }
 
 
-function get_legal_moves(color, bd, coord, ep_target) {
+function get_moves(color, bd, coord, ep_target) {
     var piece = bd[coord[0]][coord[1]];
     var type = piece.substring(1,2);
     var moves = [];
@@ -660,7 +676,7 @@ function get_can_move(color, bd, coord) {
         return true;
     }
     else {
-        if(square.substring(0,1) == opposite_color(color)) {
+        if(square.substring(0,1) == opposite(color)) {
             return true;
         }
         else {
@@ -668,7 +684,7 @@ function get_can_move(color, bd, coord) {
         }
     }
 }
-function get_legal_moves_from_directions(color, bd, directions, coord) {
+function get_moves_from_directions(color, bd, directions, coord) {
 		lm = [];
     for(var i=0; i<directions.length; i++) {
         var dir = directions[i];
@@ -681,7 +697,7 @@ function get_legal_moves_from_directions(color, bd, directions, coord) {
                 step++;
                 //if move is opposite piece, stop calculating on this line
                 var square = bd[move[0]][move[1]];
-                if(square != 0 && square.substring(0,1) == opposite_color(color)) {
+                if(square != 0 && square.substring(0,1) == opposite(color)) {
                     break;
                 }
             }
@@ -695,13 +711,13 @@ function get_legal_moves_from_directions(color, bd, directions, coord) {
 
 function get_bishop_moves(color, bd, coord) {
     var directions = [[1,1],[1,-1],[-1,-1],[-1,1]];
-    return get_legal_moves_from_directions(color, bd, directions, coord);
+    return get_moves_from_directions(color, bd, directions, coord);
 }
 
 
 function get_rook_moves(color, bd, coord) {
     var directions = [[1,0],[0,1],[-1,0],[0,-1]];
-    return get_legal_moves_from_directions(color, bd, directions, coord);
+    return get_moves_from_directions(color, bd, directions, coord);
 }
 
 
@@ -849,40 +865,48 @@ function highlight_legal_moves(selectedSquare) {
     var piece = board[coord[0]][coord[1]];
     var color = piece.substring(0,1);
     var type = piece.substring(1,2);
-    var moves = [];
-    switch(type) {
-        case 'p':
-            moves = get_pawn_moves(color, board, coord, en_passant_target);
-            break;
-        case 'n':
-            moves = get_knight_moves(color, board, coord);
-            break;
-        case 'b':
-            moves = get_bishop_moves(color, board, coord);
-            break;
-        case 'r':
-            moves = get_rook_moves(color, board, coord);
-            break;
-        case 'q':
-            moves = get_queen_moves(color, board, coord);
-            break;
-        case 'k':
-            moves = get_king_moves(color, board, coord);
-            break;
-        default:
-            break;
+    var moves = get_legal_moves(color, board, coord, en_passant_target);
+    for(var i=0; i<moves.length; i++) {
+        var square = coord_to_square(moves[i]);
+        document.getElementById(square).style.backgroundColor = legal_move_color(square);
+        legal_moves.push(square);
     }
-    if (moves.length > 0) {
-        for(var i=0; i<moves.length; i++) {
-            // determine if this move would place yourself in check
-            var new_coord = moves[i];
-            if(!king_is_in_check(color, board, coord, new_coord)) {
-                var square = coord_to_square(new_coord);
-                document.getElementById(square).style.backgroundColor = legal_move_color(square);
-                legal_moves.push(square);
+}
+
+function get_all_legal_moves(color, bd, ep_target) {
+    console.log('get_all_legal_moves('+color);
+		var lm = [];
+    for (var i=0; i<8; i++) {
+        for (var j=0; j<8; j++) {
+            if(bd[i][j] != 0 && bd[i][j].substr(0,1) == color) {
+                //get moves for this piece
+                var moves = get_legal_moves(color, bd, [i,j], ep_target);
+                if(moves) {
+                    lm.push(moves);
+                }
             }
         }
     }
+    return lm;
+}
+
+function get_legal_moves(color, bd, coord, ep_target) {
+    var lm = [];
+    var moveObj = get_moves(color, board, coord, ep_target);
+    if(!moveObj) {
+        //TODO no legal moves? must be a checkmate
+        console.log('game over?');
+        return;
+    }
+    var moves = moveObj.to;
+    for(var i=0; i<moves.length; i++) {
+        // determine if this move would place player in check
+        var new_coord = moves[i];
+        if(!king_is_in_check(color, bd, coord, new_coord)) {
+            lm.push(new_coord);
+        }
+    }
+    return lm;
 }
 
 function coord_to_square(coord) {
