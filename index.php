@@ -202,6 +202,7 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 </div>
 
 <hr />
+<div id='game_over_div'></div>
 <table id='move_history_table' width='180'>
 <tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
 </table>
@@ -421,23 +422,45 @@ function format_move(next_move, color, promotion_choice)
 
     // determine if the opposite king is in check
     king_in_check = king_is_in_check(opposite(color), board, old_coord, new_coord)
-    if(king_in_check) {
-        formattedMove = formattedMove + "+";
+    // determine if the game is over... i.e. checkmate
+    gameOver = is_game_over(opposite(color), board, old_coord, new_coord);
+    if(gameOver) { //game is over (i.e. no legal moves)
+        if(king_in_check) { //and king is in check
+            formattedMove += "#"; //CHECKMATE!
+            update_game_over_box(color, 'checkmate');
+        }
+        else {
+            //no legal moves exist, but king isn't in check
+            formattedMove += " stalemate";
+            update_game_over_box(color, 'stalemate');
+        }
     }
-    //TODO determine if the game is over... i.e. checkmate
-    gameOver = is_game_over(opposite(color), board);
-    console.log('gameOver = ' + gameOver);
-    if(gameOver) {
-        formattedMove += "++";
+    else if(king_in_check) {
+        formattedMove = formattedMove + "+";
     }
     
     return formattedMove;
 }
 
-function is_game_over(color, bd) {
-    var lm = get_all_legal_moves(color, bd, en_passant_target);
-    console.log('is_game_over');
-    console.log(lm);
+function update_game_over_box(color, outcome) {
+    var box = document.getElementById('game_over_div');
+    var msg = "";
+    switch(outcome) {
+        case 'checkmate':
+            msg = (color == 'w') ? "1-0  white wins" : "0-1  black wins";
+            break;
+        case 'stalemate':
+            msg = "&frac12;";
+            break;
+    }
+    box.innerHTML = "<h2 style='padding-left:5px;'>"+msg+"</h2>";
+}
+
+function is_game_over(color, bd, old_coord, new_coord) {
+    var from = coord_to_square(old_coord);
+    var to = coord_to_square(new_coord);
+    var new_board = create_new_board(bd, from, to);
+    var lm = get_all_legal_moves(color, new_board, en_passant_target);
     if(lm.length == 0) {
         return true;
     }
@@ -456,7 +479,7 @@ function king_is_in_check(color, bd, old_coord, new_coord) {
     var new_board = create_new_board(bd, from, to);
     king_loc = get_king_location(color, new_board);
     if(king_loc == null) {
-        return false;
+        return false; //should never happen...
     }
     //is this king in check? i.e. does this location now fall within the opposite color's attack squares?
     //calculate attack squares
@@ -874,7 +897,6 @@ function highlight_legal_moves(selectedSquare) {
 }
 
 function get_all_legal_moves(color, bd, ep_target) {
-    console.log('get_all_legal_moves('+color);
 		var lm = [];
     for (var i=0; i<8; i++) {
         for (var j=0; j<8; j++) {
@@ -882,7 +904,9 @@ function get_all_legal_moves(color, bd, ep_target) {
                 //get moves for this piece
                 var moves = get_legal_moves(color, bd, [i,j], ep_target);
                 if(moves) {
-                    lm.push(moves);
+                    if(moves.length > 0) {
+                        lm.push(moves);
+                    }
                 }
             }
         }
@@ -892,13 +916,12 @@ function get_all_legal_moves(color, bd, ep_target) {
 
 function get_legal_moves(color, bd, coord, ep_target) {
     var lm = [];
-    var moveObj = get_moves(color, board, coord, ep_target);
+    var moveObj = get_moves(color, bd, coord, ep_target);
     if(!moveObj) {
-        //TODO no legal moves? must be a checkmate
-        console.log('game over?');
-        return;
+        return null;
     }
     var moves = moveObj.to;
+    var from = coord_to_square(coord);
     for(var i=0; i<moves.length; i++) {
         // determine if this move would place player in check
         var new_coord = moves[i];
