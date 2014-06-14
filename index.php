@@ -1,7 +1,14 @@
 <?php
-/* Chess By Devin Gray <devingray@gmail.com>
-*  This is an evolving chess application written by Devin Gray.  The languages used in this application are: PHP, HTML, and Javascript on the front-end, which will invoke a CGI program written in C and/or Go on the back-end.  I will experiment with many types of game modes and AI algorithms.  My goal is to build an AI that can beat me consistently in a head to head match, or at the very least a fun game of chess!
-*/
+/*-----------------------------------------------------------------------------  
+ *  Chess By Devin Gray <devingray@gmail.com>
+ *-----------------------------------------------------------------------------  
+ *  This is an evolving chess application written by Devin Gray.  The languages
+ *  used in this application are: PHP, HTML, and Javascript on the front-end, 
+ *  which will invoke a CGI program written in C and/or Go on the back-end.  I 
+ *  will experiment with many types of game modes and AI algorithms.  My goal 
+ *  is to build an AI that can beat me consistently in a head to head match, 
+ *  or at the very least a fun game of chess!
+ *---------------------------------------------------------------------------*/
 
 $num_to_letter = array('a','b','c','d','e','f','g','h');
 $pieces = array(
@@ -208,10 +215,20 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 </table>
 <br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
 <hr />
-<p style='font-size:20px; padding-left:5px; font-weight:bold'>
-<a href="javascript:void(0);" onclick='review("back");' id='review_back'>&lt;</a> | 
-<a href="javascript:void(0);" onclick='review("forward");' id='review_forward'>&gt;</a>
-</p>
+<div id='enable_review'>
+  <p style='font-size:35px; padding-left:5px; font-weight:bold'>
+    <a href='javascript:void(0);' onclick='enableReview(true)'>&#8676;</a>
+  </p>
+</div>
+<div id='review_controls' style='display:none'>
+  <p style='font-size:35px; padding-left:5px; font-weight:bold'>
+    <a href="javascript:void(0);" onclick='enableReview(false);' id='review_off'>&#8634;</a> 
+    <a href="javascript:void(0);" onclick='review("beginning");' id='review_beginning'>&#8676;</a> 
+    <a href="javascript:void(0);" onclick='review("back");' id='review_back'>&#8672;</a> 
+    <a href="javascript:void(0);" onclick='review("forward");' id='review_forward'>&#8674;</a>
+    <a href="javascript:void(0);" onclick='review("end");' id='review_end'>&#8677;</a>
+  </p>
+  </div>
 </td>
 </tr></table>
 <hr />
@@ -236,7 +253,7 @@ var board = null;
 var num_to_letter = ['a','b','c','d','e','f','g','h'];
 var pieces = JSON.parse('<?=json_encode($pieces); ?>');
 var history = [];
-var current_move = null;
+var ply_count = 0;
 var history_cursor = null;
 var highlighted_move;
 var halfmove_clock = 0;
@@ -1060,9 +1077,9 @@ function update_history(player, move, formattedMove) {
     var fen = document.getElementById('fen_record').value;
     update_fen_history(fen);
     var tablePosition = tablePositionRow + ":" + tablePositionCol;
-    history[tablePosition] = [player, move, fen, tablePosition];
-    current_move = [player, tablePosition];
-    history_cursor = current_move;
+    history[ply_count] = [player, move, fen, tablePosition];
+    history_cursor = ply_count;
+    ply_count++;
     console.log(history);
 
     //highlight what squares did the move    
@@ -1338,31 +1355,52 @@ function update_fen_history(fen) {
 
 //Review a move from the history.  Update the board UI, lock out move selection
 function review(direction) {
-    if(!history_cursor) {
-        return;
+    var currentObj = history[history_cursor];
+    switch(direction) {
+        case 'back':
+            if(history_cursor <=0) {
+                console.log('at the beginning of history...');
+                return;
+            }
+            history_cursor--;
+            break;
+        case 'forward':
+            if(history_cursor >= history.length-1) {
+                console.log('at the end of history...');
+                return;
+            }
+            history_cursor++;
+            break;
+        default:
+            return;
+    }
+    if(currentObj) {
+        var currentCell = getHistoryCell(currentObj);
+        currentCell.style.border = '0px';
     }
     console.log('history_cursor=');
     console.log(history_cursor);
-    var player = history_cursor[0];
-    var currentTablePosition = history_cursor[1];
+    var newObj = history[history_cursor];
+    var newCell = getHistoryCell(newObj);
+    newCell.style.border = '1px solid red';
+}
+
+function getHistoryCell(historyObj) {
+    console.log('historyObj=');
+    console.log(historyObj);
+    if(!historyObj) {
+        return null;
+    }
+    //history[ply_count] = [player, move, fen, tablePosition];
+    var player = historyObj[0];
+    var move = historyObj[1];
+    var fen = historyObj[2];
+    var currentTablePosition = historyObj[3];
     var a = currentTablePosition.split(":");
     var tablePositionRow = parseInt(a[0]);
     console.log('tablePositionRow = ' + tablePositionRow);
     var tablePositionCol = parseInt(a[1]);
     console.log('tablePositionCol = ' + tablePositionCol);
-
-    switch(direction) {
-        case 'back':
-            tablePositionRow = (tablePositionCol == 0) ? tablePositionRow-1 : tablePositionRow;
-            tablePositionCol = (tablePositionCol == 0) ? 1: 0;
-            break;
-        case 'forward':
-            tablePositionRow = (tablePositionCol == 1) ? tablePositionRow+1 : tablePositionRow;
-            tablePositionCol = (tablePositionCol == 0) ? 1: 0;
-            break;
-        default:
-            return;
-    }
 
     //for now just draw a red box around the cell
     var table = document.getElementById('move_history_table');
@@ -1373,10 +1411,20 @@ function review(direction) {
     console.log(row);
     var cell = row.cells[tablePositionCol+1];
     console.log(cell);
-    cell.style.border = '1px solid red';
+    return cell;
+}
 
-    //update cursor
-    history_cursor = [opposite(player), tablePositionRow + ":" + tablePositionCol];
+function enableReview(enable) {
+    var reviewControls = document.getElementById('review_controls');
+    var enableReview = document.getElementById('enable_review');
+    if(enable) {
+        reviewControls.style.display = 'inline';
+        enableReview.style.display = 'none';
+    }
+    else {
+        reviewControls.style.display = 'none';
+        enableReview.style.display = 'inline';
+    }
 }
 
 //onload
