@@ -215,6 +215,11 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <br />
 <a href="javascript:void(0);" onclick="open_fen_in_new_tab()" />Open in New Tab</a>
 <hr />
+FEN History (<a href="javascript:void(0);" onclick="toggle_fen_history()" />+/-</a>):<br />
+<div style='display:none' id='fen_history'>
+<?=$fen;?>
+</div>
+<hr />
 <a href="javascript:void(0);" onclick="open_random_in_new_tab()" />Random Board?</a> (piece generation chance: <input type='text' id='rand_amount' name='rand_amount' value='50' style='width:25px' />%)
 </div>
 
@@ -1096,6 +1101,9 @@ function calculate_fen(active_color, from, to) {
     fen += fen_fullmove_number();
 
     document.getElementById('fen_record').value = fen;
+
+    //update fen history
+    document.getElementById('fen_history').innerHTML += "<br />" + fen;
 }
 
 function create_new_board(bd, from, to) {
@@ -1300,6 +1308,12 @@ function promotion_select(button) {
     document.getElementById('promote_'+promotion_choice).style.backgroundColor = 'white';
     button.style.backgroundColor = 'lightgreen';
     promotion_choice = type;
+}
+
+
+function toggle_fen_history() {
+    var history_div = document.getElementById('fen_history');
+    history_div.style.display = (history_div.style.display == 'none') ? 'inline' : 'none';
 }
 
 //onload
