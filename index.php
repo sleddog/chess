@@ -207,6 +207,11 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
 </table>
 <br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
+<hr />
+<p style='font-size:20px; padding-left:5px; font-weight:bold'>
+<a href="javascript:void(0);" onclick='review("back");' id='review_back'>&lt;</a> | 
+<a href="javascript:void(0);" onclick='review("forward");' id='review_forward'>&gt;</a>
+</p>
 </td>
 </tr></table>
 <hr />
@@ -231,6 +236,8 @@ var board = null;
 var num_to_letter = ['a','b','c','d','e','f','g','h'];
 var pieces = JSON.parse('<?=json_encode($pieces); ?>');
 var history = [];
+var current_move = null;
+var history_cursor = null;
 var highlighted_move;
 var halfmove_clock = 0;
 var fullmove_number = 1;
@@ -821,7 +828,7 @@ function submit_move() {
     reset_initial_square();
 
     //update the history
-    update_history('white', selectedMove, formattedMove);
+    update_history('w', selectedMove, formattedMove);
 
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
@@ -859,10 +866,10 @@ function make_move(next_move) {
     if(piece && piece.substring(0,1) == 'b') {
         var formattedMove = format_move(next_move, 'b');
         fullmove_number++;
-        calculate_fen("w", moves[0], moves[1]);
+        calculate_fen('w', moves[0], moves[1]);
         move_pieces(moves[0], moves[1]);
         //update the history
-        update_history('black', next_move, formattedMove);
+        update_history('b', next_move, formattedMove);
     }
 }
 
@@ -1032,7 +1039,9 @@ function update_history(player, move, formattedMove) {
 
     //based on the player, update the appropriate cell, or create new row
     var rowCount = table.rows.length
-    if(player == 'white') {
+    var tablePositionRow = rowCount - 1;
+    var tablePositionCol = 0;
+    if(player == 'w') {
         var row = table.insertRow(rowCount);
         var moveNumber = row.insertCell(0);
         moveNumber.innerHTML = rowCount;
@@ -1043,10 +1052,18 @@ function update_history(player, move, formattedMove) {
         var row = table.rows[rowCount-1];
         var black = row.insertCell(2);
         black.innerHTML = formattedMove;
+        tablePositionCol = 1;
+        tablePositionRow--;
     }
 
-    //update the history array with this move
-    history.push([player, move]);
+    //update the history with this move
+    var fen = document.getElementById('fen_record').value;
+    update_fen_history(fen);
+    var tablePosition = tablePositionRow + ":" + tablePositionCol;
+    history[tablePosition] = [player, move, fen, tablePosition];
+    current_move = [player, tablePosition];
+    history_cursor = current_move;
+    console.log(history);
 
     //highlight what squares did the move    
     set_highlighted_move(move)
@@ -1101,9 +1118,6 @@ function calculate_fen(active_color, from, to) {
     fen += fen_fullmove_number();
 
     document.getElementById('fen_record').value = fen;
-
-    //update fen history
-    document.getElementById('fen_history').innerHTML += "<br />" + fen;
 }
 
 function create_new_board(bd, from, to) {
@@ -1314,6 +1328,55 @@ function promotion_select(button) {
 function toggle_fen_history() {
     var history_div = document.getElementById('fen_history');
     history_div.style.display = (history_div.style.display == 'none') ? 'inline' : 'none';
+}
+
+
+function update_fen_history(fen) {
+    document.getElementById('fen_history').innerHTML += "<br />" + fen;
+}
+
+
+//Review a move from the history.  Update the board UI, lock out move selection
+function review(direction) {
+    if(!history_cursor) {
+        return;
+    }
+    console.log('history_cursor=');
+    console.log(history_cursor);
+    var player = history_cursor[0];
+    var currentTablePosition = history_cursor[1];
+    var a = currentTablePosition.split(":");
+    var tablePositionRow = parseInt(a[0]);
+    console.log('tablePositionRow = ' + tablePositionRow);
+    var tablePositionCol = parseInt(a[1]);
+    console.log('tablePositionCol = ' + tablePositionCol);
+
+    switch(direction) {
+        case 'back':
+            tablePositionRow = (tablePositionCol == 0) ? tablePositionRow-1 : tablePositionRow;
+            tablePositionCol = (tablePositionCol == 0) ? 1: 0;
+            break;
+        case 'forward':
+            tablePositionRow = (tablePositionCol == 1) ? tablePositionRow+1 : tablePositionRow;
+            tablePositionCol = (tablePositionCol == 0) ? 1: 0;
+            break;
+        default:
+            return;
+    }
+
+    //for now just draw a red box around the cell
+    var table = document.getElementById('move_history_table');
+    console.log('table=');
+    console.log(table);
+    console.log(table.rows);
+    var row = table.rows[tablePositionRow+1];
+    console.log(row);
+    var cell = row.cells[tablePositionCol+1];
+    console.log(cell);
+    cell.style.border = '1px solid red';
+
+    //update cursor
+    history_cursor = [opposite(player), tablePositionRow + ":" + tablePositionCol];
 }
 
 //onload
