@@ -213,11 +213,9 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <table id='move_history_table' width='180'>
 <tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
 </table>
-<br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
-<hr />
-<div id='enable_review'>
+<div id='enable_review' style='display:none'>
   <p style='font-size:35px; padding-left:5px; font-weight:bold'>
-    <a href='javascript:void(0);' onclick='enableReview(true)'>&#8676;</a>
+    <a href='javascript:void(0);' onclick='enableReview(true)'>&#8672;</a>
   </p>
 </div>
 <div id='review_controls' style='display:none'>
@@ -229,6 +227,7 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
     <a href="javascript:void(0);" onclick='review("end");' id='review_end'>&#8677;</a>
   </p>
   </div>
+<br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
 </td>
 </tr></table>
 <hr />
@@ -847,6 +846,9 @@ function submit_move() {
     //update the history
     update_history('w', selectedMove, formattedMove);
 
+    //hide review controls
+    enableReview(false);
+
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
 }
@@ -1080,7 +1082,6 @@ function update_history(player, move, formattedMove) {
     history[ply_count] = [player, move, fen, tablePosition];
     history_cursor = ply_count;
     ply_count++;
-    console.log(history);
 
     //highlight what squares did the move    
     set_highlighted_move(move)
@@ -1357,19 +1358,25 @@ function update_fen_history(fen) {
 function review(direction) {
     var currentObj = history[history_cursor];
     switch(direction) {
+        case 'beginning':
+            history_cursor=0;
+            break;
         case 'back':
             if(history_cursor <=0) {
-                console.log('at the beginning of history...');
+                //at the beginning of history...
                 return;
             }
             history_cursor--;
             break;
         case 'forward':
             if(history_cursor >= history.length-1) {
-                console.log('at the end of history...');
+                //at the end of history...
                 return;
             }
             history_cursor++;
+            break;
+        case 'end':
+            history_cursor=history.length-1;
             break;
         default:
             return;
@@ -1378,16 +1385,12 @@ function review(direction) {
         var currentCell = getHistoryCell(currentObj);
         currentCell.style.border = '0px';
     }
-    console.log('history_cursor=');
-    console.log(history_cursor);
     var newObj = history[history_cursor];
     var newCell = getHistoryCell(newObj);
     newCell.style.border = '1px solid red';
 }
 
 function getHistoryCell(historyObj) {
-    console.log('historyObj=');
-    console.log(historyObj);
     if(!historyObj) {
         return null;
     }
@@ -1398,19 +1401,12 @@ function getHistoryCell(historyObj) {
     var currentTablePosition = historyObj[3];
     var a = currentTablePosition.split(":");
     var tablePositionRow = parseInt(a[0]);
-    console.log('tablePositionRow = ' + tablePositionRow);
     var tablePositionCol = parseInt(a[1]);
-    console.log('tablePositionCol = ' + tablePositionCol);
 
     //for now just draw a red box around the cell
     var table = document.getElementById('move_history_table');
-    console.log('table=');
-    console.log(table);
-    console.log(table.rows);
     var row = table.rows[tablePositionRow+1];
-    console.log(row);
     var cell = row.cells[tablePositionCol+1];
-    console.log(cell);
     return cell;
 }
 
@@ -1420,10 +1416,18 @@ function enableReview(enable) {
     if(enable) {
         reviewControls.style.display = 'inline';
         enableReview.style.display = 'none';
+        review("end");
     }
     else {
         reviewControls.style.display = 'none';
         enableReview.style.display = 'inline';
+        //turn off all history highlighting
+        var currentObj = history[history_cursor];
+        var cell = getHistoryCell(currentObj);
+        if(cell) {
+            cell.style.border = '0px';
+        }
+        history_cursor=null;
     }
 }
 
