@@ -260,6 +260,8 @@ var fullmove_number = 1;
 var special_moves = {};
 var en_passant_target = "<?=$en_passant_target;?>";
 var promotion_choice = 'q';  // by default assume queen is desired promotion
+var review_mode = false;
+var saved_board_state = null;
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -325,6 +327,11 @@ function square_to_coord(square) {
 }
 
 function square_select(button) {
+    if(review_mode) {
+        console.log('in review mode...');
+        return;
+    }
+
     var coord = square_to_coord(button.id);
     var value = board[coord[0]][coord[1]];
 
@@ -1356,6 +1363,9 @@ function update_fen_history(fen) {
 
 //Review a move from the history.  Update the board UI, lock out move selection
 function review(direction) {
+    if(!saved_board_state) {
+        saved_board_state = board;
+    }
     var currentObj = history[history_cursor];
     switch(direction) {
         case 'beginning':
@@ -1417,6 +1427,8 @@ function enableReview(enable) {
         reviewControls.style.display = 'inline';
         enableReview.style.display = 'none';
         review("end");
+        review_mode = true;
+        reset_initial_square();
     }
     else {
         reviewControls.style.display = 'none';
@@ -1428,6 +1440,7 @@ function enableReview(enable) {
             cell.style.border = '0px';
         }
         history_cursor=null;
+        review_mode = false;
     }
 }
 
