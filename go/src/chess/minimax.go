@@ -2,7 +2,7 @@ package chess
 
 //Minimax-Decision(state) returns an action
 func miniMaxDecision(state ChessNode) Move {
-	//v = maxValue(state)
+	//v = Max-Value(state)
 	//return the action in successors(state) with value v
 	return Move{}
 }
@@ -22,7 +22,20 @@ func minValue(state ChessNode) int {
 	//If Terminal-Test(state) then return Utility(state)
 	//v <= +infinity
 	//for a, s in Successors(state) do
-	//  v <= Mix(v, Min-Value(s))
+	//  v <= Min(v, Max-Value(s))
 	//return v
+	return 0
+}
+
+func terminalTest(state ChessNode) bool {
+	return false
+}
+
+func successors(state ChessNode) []Move {
+	var moves []Move
+	return moves
+}
+
+func utility(state ChessNode) int {
 	return 0
 }
