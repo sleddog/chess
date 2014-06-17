@@ -12,12 +12,20 @@ func miniMaxDecision(state ChessNode) string {
 	moves := successors(state)
 	var equalMoves []Move
 	for i := 0; i < len(moves); i++ {
-		if v == utility(nextState(state, moves[i])) {
+		u := utility(nextState(state, moves[i]))
+		if v == u {
 			equalMoves = append(equalMoves, moves[i])
 		}
 	}
-	randMove := equalMoves[rand.Intn(len(equalMoves))]
-	move := formatNextMove(randMove)
+	move := ""
+	if equalMoves != nil {
+		randMove := equalMoves[rand.Intn(len(equalMoves))]
+		move = formatNextMove(randMove)
+	} else {
+		//somehow couldn't find a move that matched max, so just grab one
+		randMove := moves[rand.Intn(len(moves))]
+		move = formatNextMove(randMove)
+	}
 	return move
 }
 
