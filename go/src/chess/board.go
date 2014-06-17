@@ -8,7 +8,11 @@ import (
 )
 
 func createChessNodeUsingArray(dat []string) ChessNode {
-	node := ChessNode{board: createBoardUsingArray(dat), depth: 0}
+	node := ChessNode{
+		board:        createBoardUsingArray(dat),
+		depth:        0,
+		active_color: "b",
+	}
 	return node
 }
 
