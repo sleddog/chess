@@ -49,7 +49,6 @@ func TestMakeMove(t *testing.T) {
 }
 
 func TestMiniMax(t *testing.T) {
-	fmt.Println("TESTING MINIMAX")
 	fenPlacement := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 	fmt.Println("fen = ", fenPlacement)
 	board := createBoardUsingFen(fenPlacement)
@@ -60,8 +59,17 @@ func TestMiniMax(t *testing.T) {
 }
 
 func TestMiniMax2(t *testing.T) {
-	fmt.Println("TESTING MINIMAX")
 	fenPlacement := "rn1qkbnr/p1p1p1pp/3p1p2/1p1P4/8/2NB1NP1/PPPP1P1P/R1BQ1RK1"
+	fmt.Println("fen = ", fenPlacement)
+	board := createBoardUsingFen(fenPlacement)
+
+	node := ChessNode{board: board, depth: 0, active_color: "b"}
+	move := miniMaxDecision(node)
+	fmt.Println("move = ", move)
+}
+
+func TestMiniMax3(t *testing.T) {
+	fenPlacement := "rnbqkbnr/p1pppppp/8/1p6/2B1P3/8/PPPP1PPP/RNBQK1NR"
 	fmt.Println("fen = ", fenPlacement)
 	board := createBoardUsingFen(fenPlacement)
 

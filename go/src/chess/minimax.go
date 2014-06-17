@@ -1,6 +1,7 @@
 package chess
 
 import (
+	//	"fmt"
 	"math/rand"
 )
 
@@ -9,10 +10,14 @@ import (
 //return the action in successors(state) with value v
 func miniMaxDecision(state ChessNode) string {
 	v := maxValue(state)
+	//fmt.Println("v=", v)
 	moves := successors(state)
 	var equalMoves []Move
 	for i := 0; i < len(moves); i++ {
-		u := utility(nextState(state, moves[i]))
+		ns := nextState(state, moves[i])
+		ns.active_color = state.active_color
+		u := utility(ns)
+		//fmt.Println("u=", u)
 		if v == u {
 			equalMoves = append(equalMoves, moves[i])
 		}
