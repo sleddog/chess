@@ -1,9 +1,10 @@
 package chess
 
 type ChessNode struct {
-	board             [8][8]string
-	white_legal_moves []Move
-	black_legal_moves []Move
+	board        [8][8]string
+	active_color string
+	legal_moves  []Move
+	depth        int
 }
 
 type Move struct {

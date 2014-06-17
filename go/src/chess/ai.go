@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+//Get Next move using mini max algorithm
+func GetNextMoveUsingMiniMax(dat []string) string {
+	var move string
+	node := createChessNodeUsingArray(dat)
+	move = miniMaxDecision(node)
+	return move
+}
+
 // Get Next Move based on minimizing opponent material value
 // - calculate all possible legal moves
 // - construct the resulting board position for each move
@@ -17,16 +25,17 @@ func GetNextMoveUsingPointValue(dat []string) string {
 	var move string
 
 	node := createChessNodeUsingArray(dat)
+	node.legal_moves = getLegalMoves("b", node.board)
 	//printNode(node)
 
-	if len(node.black_legal_moves) > 0 {
-		for i := 0; i < len(node.black_legal_moves); i++ {
-			newBoard := makeMove(node.board, node.black_legal_moves[i])
+	if len(node.legal_moves) > 0 {
+		for i := 0; i < len(node.legal_moves); i++ {
+			newBoard := makeMove(node.board, node.legal_moves[i])
 			materialValue := calculatePointValue("w", newBoard)
-			node.black_legal_moves[i].value = materialValue
+			node.legal_moves[i].value = materialValue
 		}
 
-		moves := node.black_legal_moves
+		moves := node.legal_moves
 		sort.Sort(ByMaterialValue(moves))
 
 		//after sorting, choose a random move that has the same minimum score
@@ -37,7 +46,7 @@ func GetNextMoveUsingPointValue(dat []string) string {
 				break
 			}
 		}
-		randMove := node.black_legal_moves[rand.Intn(j)]
+		randMove := node.legal_moves[rand.Intn(j)]
 		move = formatNextMove(randMove)
 	}
 

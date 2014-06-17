@@ -38,7 +38,7 @@ func TestF7PawnShouldNotMove(t *testing.T) {
 	fmt.Println("fen = ", fenPlacement)
 	board := createBoardUsingFen(fenPlacement)
 	node := ChessNode{board: board}
-	node.black_legal_moves = getLegalMoves("b", node.board)
+	node.legal_moves = getLegalMoves("b", node.board)
 }
 
 func TestKingShouldNotKillQueen(t *testing.T) {
@@ -46,7 +46,7 @@ func TestKingShouldNotKillQueen(t *testing.T) {
 	fmt.Println("fen = ", fenPlacement)
 	board := createBoardUsingFen(fenPlacement)
 	node := ChessNode{board: board}
-	node.black_legal_moves = getLegalMoves("b", node.board)
-	fmt.Println("# moves = ", len(node.black_legal_moves))
-	fmt.Println(node.black_legal_moves)
+	node.legal_moves = getLegalMoves("b", node.board)
+	fmt.Println("# moves = ", len(node.legal_moves))
+	fmt.Println(node.legal_moves)
 }

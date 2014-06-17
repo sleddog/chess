@@ -28,7 +28,9 @@ func randomMove(w http.ResponseWriter, r *http.Request) {
 	//TODO pass in the board properly... currently a []string, needed to be just a string
 	//fmt.Fprintf(w, chess.GetNextMove())
 
-	fmt.Fprintf(w, chess.GetNextMoveUsingPointValue(board))
+	//fmt.Fprintf(w, chess.GetNextMoveUsingPointValue(board))
+
+	fmt.Fprintf(w, chess.GetNextMoveUsingMiniMax(board))
 
 	fmt.Fprintf(w, "}\n")
 }

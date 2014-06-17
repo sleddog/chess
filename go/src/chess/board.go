@@ -8,8 +8,7 @@ import (
 )
 
 func createChessNodeUsingArray(dat []string) ChessNode {
-	node := ChessNode{board: createBoardUsingArray(dat)}
-	node.black_legal_moves = getLegalMoves("b", node.board)
+	node := ChessNode{board: createBoardUsingArray(dat), depth: 0}
 	return node
 }
 
@@ -43,7 +42,7 @@ func createBoardUsingArray(dat []string) [8][8]string {
 
 func createChessNodeUsingMap(dat map[string]string) ChessNode {
 	node := ChessNode{board: createBoardUsingMap(dat)}
-	node.black_legal_moves = getMoves("b", node.board)
+	node.legal_moves = getMoves("b", node.board)
 	return node
 }
 
@@ -117,7 +116,7 @@ func convertJsonToMap(board_json string) map[string]string {
 
 func createChessNode(board_json string) ChessNode {
 	node := ChessNode{board: createBoard(board_json)}
-	node.black_legal_moves = getMoves("b", node.board)
+	node.legal_moves = getMoves("b", node.board)
 	return node
 }
 
