@@ -90,7 +90,8 @@ func successors(state ChessNode) []Move {
 }
 
 func utility(state ChessNode) int {
-	utilityValue := calculatePointValue(state.active_color, state.board)
+	utilityValue := calculatePointValue(state.active_color, state.board) -
+		calculatePointValue(opposite(state.active_color), state.board)
 	return utilityValue
 }
 
