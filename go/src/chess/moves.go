@@ -246,10 +246,17 @@ func kingIsInCheck(color string, board [8][8]string, move Move) bool {
 
 //apply the move to the supplied chess board
 func makeMove(board [8][8]string, move Move) [8][8]string {
+	var newBoard [8][8]string
+	for row := 7; row >= 0; row-- {
+		for col := 0; col < 8; col++ {
+			newBoard[row][col] = board[row][col]
+		}
+	}
+
 	piece := board[move.from.row][move.from.col]
-	board[move.from.row][move.from.col] = "0"
-	board[move.to.row][move.to.col] = piece
-	return board
+	newBoard[move.from.row][move.from.col] = "0"
+	newBoard[move.to.row][move.to.col] = piece
+	return newBoard
 }
 
 func getKingLocation(color string, board [8][8]string) Coord {

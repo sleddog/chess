@@ -9,9 +9,10 @@ import (
 )
 
 //Get Next move using mini max algorithm
-func GetNextMoveUsingMiniMax(dat []string) string {
+func GetNextMoveUsingMiniMax(dat []string, prev_move string) string {
 	var move string
-	node := createChessNodeUsingArray(dat)
+	active_color := "b"
+	node := createChessNodeUsingArray(dat, active_color, prev_move)
 	move = miniMaxDecision(node)
 	return move
 }
@@ -24,7 +25,7 @@ func GetNextMoveUsingMiniMax(dat []string) string {
 func GetNextMoveUsingPointValue(dat []string) string {
 	var move string
 
-	node := createChessNodeUsingArray(dat)
+	node := createChessNodeUsingArray(dat, "", "")
 	node.legal_moves = getLegalMoves("b", node.board)
 	//printNode(node)
 

@@ -7,13 +7,41 @@ import (
 	"strings"
 )
 
-func createChessNodeUsingArray(dat []string) ChessNode {
+func createState(board [8][8]string, active_color string, prev_move string) ChessNode {
 	node := ChessNode{
-		board:        createBoardUsingArray(dat),
-		depth:        0,
-		active_color: "b",
+		board:         board,
+		depth:         0,
+		active_color:  active_color,
+		prev_move:     stringToMove(prev_move, board),
+		utility_value: utility(active_color, board),
 	}
 	return node
+}
+
+//"e2-e4" to Move{}
+func stringToMove(str string, board [8][8]string) Move {
+	move := Move{
+		from: stringToCoord(str[0:2]),
+		to:   stringToCoord(str[3:5]),
+	}
+	//determine piece by checking the board at the 'to' position
+	move.piece = board[move.to.row][move.to.col]
+	return move
+}
+
+func stringToCoord(str string) Coord {
+	letters := "abcdefgh"
+	row := strings.Index(letters, str[0:1])
+	if intval, err := strconv.Atoi(str[1:2]); err == nil {
+		col := intval - 1
+		return Coord{row: row, col: col}
+	}
+	return Coord{row: -1, col: -1}
+}
+
+func createChessNodeUsingArray(dat []string, active_color, prev_move string) ChessNode {
+	board := createBoardUsingArray(dat)
+	return createState(board, active_color, prev_move)
 }
 
 func createBoardUsingArray(dat []string) [8][8]string {

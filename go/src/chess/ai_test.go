@@ -29,13 +29,13 @@ func TestParseFen(t *testing.T) {
 	fmt.Println("board = ", board)
 }
 
-func TestGetNextMoveUsingPointValue(t *testing.T) {
-	var dat []string
-	dat = append(dat, "[[\"wr\",\"wn\",\"wb\",\"wq\",\"wk\",\"wb\",\"wn\",\"wr\"],[\"wp\",\"wp\",\"wp\",\"wp\",0,\"wp\",\"wp\",\"wp\"],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[\"bp\",0,0,0,\"wp\",0,0,0],[0,\"bp\",\"bp\",\"bp\",\"bp\",\"bp\",\"bp\",\"bp\"],[\"br\",\"bn\",\"bb\",\"bq\",\"bk\",\"bb\",\"bn\",\"br\"]]")
-	fmt.Println("dat=", dat)
-	move := GetNextMoveUsingPointValue(dat)
-	fmt.Println("move=", move)
-}
+//func TestGetNextMoveUsingPointValue(t *testing.T) {
+//	var dat []string
+//	dat = append(dat, "[[\"wr\",\"wn\",\"wb\",\"wq\",\"wk\",\"wb\",\"wn\",\"wr\"],[\"wp\",\"wp\",\"wp\",\"wp\",0,\"wp\",\"wp\",\"wp\"],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[\"bp\",0,0,0,\"wp\",0,0,0],[0,\"bp\",\"bp\",\"bp\",\"bp\",\"bp\",\"bp\",\"bp\"],[\"br\",\"bn\",\"bb\",\"bq\",\"bk\",\"bb\",\"bn\",\"br\"]]")
+//	fmt.Println("dat=", dat)
+//	move := GetNextMoveUsingPointValue(dat)
+//	fmt.Println("move=", move)
+//}
 
 func TestMakeMove(t *testing.T) {
 	fenPlacement := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
@@ -49,31 +49,18 @@ func TestMakeMove(t *testing.T) {
 }
 
 func TestMiniMax(t *testing.T) {
-	fenPlacement := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+	fenPlacement := "7k/8/8/7p/6Q1/8/8/K8"
 	fmt.Println("fen = ", fenPlacement)
 	board := createBoardUsingFen(fenPlacement)
 
-	node := ChessNode{board: board, depth: 0, active_color: "w"}
+	//the white queen moved into the black pawn's attack square
+	node := createState(board, "b", "g3-g4")
+
 	move := miniMaxDecision(node)
 	fmt.Println("move = ", move)
-}
 
-func TestMiniMax2(t *testing.T) {
-	fenPlacement := "rn1qkbnr/p1p1p1pp/3p1p2/1p1P4/8/2NB1NP1/PPPP1P1P/R1BQ1RK1"
-	fmt.Println("fen = ", fenPlacement)
-	board := createBoardUsingFen(fenPlacement)
-
-	node := ChessNode{board: board, depth: 0, active_color: "b"}
-	move := miniMaxDecision(node)
-	fmt.Println("move = ", move)
-}
-
-func TestMiniMax3(t *testing.T) {
-	fenPlacement := "rnbqkbnr/p1pppppp/8/1p6/2B1P3/8/PPPP1PPP/RNBQK1NR"
-	fmt.Println("fen = ", fenPlacement)
-	board := createBoardUsingFen(fenPlacement)
-
-	node := ChessNode{board: board, depth: 0, active_color: "b"}
-	move := miniMaxDecision(node)
-	fmt.Println("move = ", move)
+	//the black pawn should attack this square!
+	if move != "\"next-move\":\"h5-g4\"" {
+		t.Error("WRONG MOVE!!!")
+	}
 }
