@@ -853,8 +853,9 @@ function submit_move() {
     //update the history
     update_history('w', selectedMove, formattedMove);
 
+    //TODO revisit history/review feature later...
     //hide review controls
-    enableReview(false);
+    //enableReview(false);
 
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
