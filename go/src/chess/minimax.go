@@ -90,7 +90,7 @@ func minValue(state ChessNode) int {
 func terminalTest(state ChessNode) bool {
 	//TODO check for checkmate
 	//stop at a certain depth, then return the utility
-	if state.depth >= 3 {
+	if state.depth >= 2 {
 		return true
 	}
 	return false
@@ -103,7 +103,7 @@ func successors(state ChessNode) []Move {
 }
 
 func utility(color string, board [8][8]string) int {
-	return calculatePointValue(color, board)
+	return calculatePointValue(color, board) - calculatePointValue(opposite(color), board)
 }
 
 func nextState(state ChessNode, move Move) ChessNode {
