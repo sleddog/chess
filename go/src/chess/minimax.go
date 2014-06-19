@@ -1,7 +1,7 @@
 package chess
 
 import (
-	"fmt"
+	//"fmt"
 	"math/rand"
 )
 
@@ -9,20 +9,20 @@ import (
 //v = Max-Value(state)
 //return the action in successors(state) with value v
 func miniMaxDecision(state ChessNode) string {
-	fmt.Println("miniMaxDecision(state=", state, ")")
-	fmt.Println("pre utility = ", state.utility_value)
-	v := maxValue(state)
-	fmt.Println("v=", v)
+	//fmt.Println("miniMaxDecision(state=", state, ")")
+	//fmt.Println("pre utility = ", state.utility_value)
+	v := minValue(state)
+	//fmt.Println("v=", v)
 	moves := successors(state)
 	var equalMoves []Move
 	for i := 0; i < len(moves); i++ {
 		//ns := nextState(state, moves[i])
 		//ns.active_color = state.active_color
-		u := utility(state.active_color, state.board)
-		fmt.Println("u=", u)
+		newBoard := makeMove(state.board, moves[i])
+		u := utility(opposite(state.active_color), newBoard)
+		//fmt.Println("u=", u)
 		if v == u {
-			fmt.Println("FOUND, move =", moves[i])
-
+			//fmt.Println("FOUND, move =", moves[i])
 			equalMoves = append(equalMoves, moves[i])
 		}
 	}
@@ -55,6 +55,7 @@ func maxValue(state ChessNode) int {
 	for i := 0; i < len(moves); i++ {
 		s := minValue(nextState(state, moves[i]))
 		if s >= v {
+			//fmt.Println("\n\n----->found larger value, ", s, ",", moves[i], "\n\n")
 			v = s
 		}
 	}
@@ -68,6 +69,7 @@ func maxValue(state ChessNode) int {
 //  v <= Min(v, Max-Value(s))
 //return v
 func minValue(state ChessNode) int {
+	//fmt.Println("minValue, state=", state)
 	if terminalTest(state) {
 		return state.utility_value
 	}
@@ -78,6 +80,7 @@ func minValue(state ChessNode) int {
 	for i := 0; i < len(moves); i++ {
 		s := maxValue(nextState(state, moves[i]))
 		if s <= v {
+			//fmt.Println("---->found smaller value, ", s, ",", moves[i])
 			v = s
 		}
 	}
@@ -87,7 +90,7 @@ func minValue(state ChessNode) int {
 func terminalTest(state ChessNode) bool {
 	//TODO check for checkmate
 	//stop at a certain depth, then return the utility
-	if state.depth >= 1 {
+	if state.depth >= 3 {
 		return true
 	}
 	return false
@@ -100,16 +103,10 @@ func successors(state ChessNode) []Move {
 }
 
 func utility(color string, board [8][8]string) int {
-	a := calculatePointValue(color, board)
-	b := calculatePointValue(opposite(color), board)
-	utilityValue := a //b //b //a //b - a
-	fmt.Println("utility, state.active_color=", color)
-	fmt.Println("a=", a, "b=", b, "u=", utilityValue)
-	return utilityValue
+	return calculatePointValue(color, board)
 }
 
 func nextState(state ChessNode, move Move) ChessNode {
-	fmt.Println("nextState, move = ", move)
 	newBoard := makeMove(state.board, move)
 	color := opposite(state.active_color)
 	return ChessNode{
