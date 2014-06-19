@@ -31,7 +31,7 @@ func randomMove(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Fprintf(w, chess.GetNextMoveUsingPointValue(board))
 
-	fmt.Fprintf(w, chess.GetNextMoveUsingMiniMax(board, move))
+	fmt.Fprintf(w, chess.GetNextMoveUsingMiniMax(board, move[0]))
 
 	fmt.Fprintf(w, "}\n")
 }
