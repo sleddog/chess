@@ -211,7 +211,12 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
 <div id='game_over_div'></div>
 <table id='move_history_table' width='180'>
-<tr><td>&nbsp;</td><td>White</td><td>Black</td></tr>
+<tr><td>&nbsp;</td><td>White<br />
+<div class="stopwatch" id='w-clock'></div>
+</td>
+<td>Black<br />
+<div class="stopwatch" id='b-clock'></div>
+</td></tr>
 </table>
 <div id='enable_review' style='display:none'>
   <p style='font-size:35px; padding-left:5px; font-weight:bold'>
@@ -238,7 +243,6 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
 FEN History (<a href="javascript:void(0);" onclick="toggle_fen_history()" />+/-</a>):<br />
 <div style='display:none' id='fen_history'>
-<?=$fen;?>
 </div>
 <hr />
 <a href="javascript:void(0);" onclick="open_random_in_new_tab()" />Random Board?</a> (piece generation chance: <input type='text' id='rand_amount' name='rand_amount' value='50' style='width:25px' />%)
@@ -262,6 +266,9 @@ var en_passant_target = "<?=$en_passant_target;?>";
 var promotion_choice = 'q';  // by default assume queen is desired promotion
 var review_mode = false;
 var saved_board_state = null;
+var timers = [];
+timers['w'] = null;
+timers['b'] = null;
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -1093,6 +1100,21 @@ function update_history(player, move, formattedMove) {
 
     //highlight what squares did the move    
     set_highlighted_move(move)
+
+    //update the timer
+    update_timer(player);
+}
+
+
+function update_timer(player) {
+    if(player == 'w') {
+        wClock.stop();
+        bClock.start();
+    }
+    else { //player == 'b'
+        wClock.start();
+        bClock.stop();
+    }
 }
 
 
@@ -1299,8 +1321,10 @@ function is_special_move(move) {
     return null;
 }
 
-function open_fen_in_new_tab() {
-    var fen = document.getElementById('fen_record').value;
+function open_fen_in_new_tab(fen) {
+    if(!fen) {
+        fen = document.getElementById('fen_record').value;
+    }
     window.open('/chess/?fen='+encodeURIComponent(fen), '_blank');
 }
 
@@ -1358,7 +1382,8 @@ function toggle_fen_history() {
 
 
 function update_fen_history(fen) {
-    document.getElementById('fen_history').innerHTML += "<br />" + fen;
+    var link = '<a href="javascript:void(0);" onclick="open_fen_in_new_tab(\''+fen+'\');" />'+fen+'</a><br />'
+    document.getElementById('fen_history').innerHTML += link;
 }
 
 
@@ -1445,9 +1470,65 @@ function enableReview(enable) {
     }
 }
 
+
+//JS object to store a chess clock timer
+var ChessClock = function(elem) {
+  var timer = createClock();
+  var offset;
+  var clock;
+  var interval;
+  
+  elem.appendChild(timer);
+  
+  clock = 0;
+  refreshClock();
+  
+  function createClock() {
+    return document.createElement("span");
+  }
+  
+  function start() {
+    if (!interval) {
+      offset   = Date.now();
+      interval = setInterval(update, 1);
+    }
+  }
+  
+  function stop() {
+    if (interval) {
+      clearInterval(interval);
+      interval = null;
+    }
+  }
+  
+  function update() {
+    clock += timeDiff();
+    refreshClock();
+  }
+  
+  function refreshClock() {
+    timer.innerHTML = Math.round(clock/1000) + "s"; 
+  }
+  
+  function timeDiff() {
+    var now = Date.now();
+    var d = now - offset;
+    offset = now;
+    return d;
+  }
+  
+  this.start  = start;
+  this.stop   = stop;
+};
+
 //onload
 (function() {
   init_board('<?=$board_to_draw; ?>');
+
+  //create clocks
+  wClock = new ChessClock(document.getElementById("w-clock"));
+  bClock = new ChessClock(document.getElementById("b-clock"));
+
 })();
 
 </script>
