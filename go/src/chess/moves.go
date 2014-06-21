@@ -90,11 +90,46 @@ func getPawnMoves(color string, piece string, row int, col int, board [8][8]stri
 						piece: piece})
 			}
 		}
-
 		//TODO en passant
-
 	} else { //color == "w"
-		//TODO white pawn moves...
+		//check if first square in front is blank
+		if row < 7 && board[row+1][col] == "0" {
+			moves = append(moves,
+				Move{from: fromCoord,
+					to:    Coord{row: row + 1, col: col},
+					piece: piece})
+
+			//check 2 moves in front if on the initial row
+			if row == 1 && board[row+2][col] == "0" {
+				//check 2 moves in front
+				moves = append(moves,
+					Move{from: fromCoord,
+						to:    Coord{row: row + 2, col: col},
+						piece: piece})
+			}
+		}
+
+		//can you attack diagonally to the right?
+		if col < 7 && row < 7 {
+			attackSquare := board[row+1][col+1]
+			if attackSquare != "0" && attackSquare[0:1] == opposite(color) {
+				moves = append(moves,
+					Move{from: fromCoord,
+						to:    Coord{row: row + 1, col: col + 1},
+						piece: piece})
+			}
+		}
+		//can you attack diagonally to the left?
+		if col > 0 && row < 7 {
+			attackSquare := board[row+1][col-1]
+			if attackSquare != "0" && attackSquare[0:1] == opposite(color) {
+				moves = append(moves,
+					Move{from: fromCoord,
+						to:    Coord{row: row + 1, col: col - 1},
+						piece: piece})
+			}
+		}
+		//TODO en passant
 	}
 	return moves
 }
