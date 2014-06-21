@@ -167,6 +167,7 @@ else {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chess by Devin Gray</title>
+    <link rel="shortcut icon" href="http://devingray.com/chess/favicon.ico" />
 
     <!-- Bootstrap -->
     <!-- Latest compiled and minified CSS -->
