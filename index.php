@@ -211,10 +211,10 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
 <div id='game_over_div'></div>
 <table id='move_history_table' width='180'>
-<tr><td>&nbsp;</td><td>White<br />
+<tr><td>&nbsp;</td><td><b>White</b><br />
 <div class="stopwatch" id='w-clock'></div>
 </td>
-<td>Black<br />
+<td><b>Black</b><br />
 <div class="stopwatch" id='b-clock'></div>
 </td></tr>
 </table>
@@ -1507,7 +1507,14 @@ var ChessClock = function(elem) {
   }
   
   function refreshClock() {
-    timer.innerHTML = Math.round(clock/1000) + "s"; 
+    var totalSec = Math.round(clock/1000);
+    var hours = parseInt( totalSec / 3600 ) % 24;
+    var minutes = parseInt( totalSec / 60 ) % 60;
+    var seconds = totalSec % 60;
+    var result = (hours < 10 ? "0" + hours : hours) + "-" + 
+                 (minutes < 10 ? "0" + minutes : minutes) + "-" + 
+                 (seconds  < 10 ? "0" + seconds : seconds);    
+    timer.innerHTML = result; 
   }
   
   function timeDiff() {
