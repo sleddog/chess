@@ -181,7 +181,7 @@ else {
     <![endif]-->
   </head>
   <body>
-<div class='container fill'>
+<div class='container fill' style='min-width: 925px'>
 <table><tr><td valign=top style='padding:10px'>
 <div class="table-responsive" style='height:100%'>
 <?=draw_chess_board_from_config($board_to_draw);?>
@@ -212,7 +212,7 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <hr />
 <div id='game_over_div'></div>
 <table id='move_history_table' width='180'>
-<tr><td>&nbsp;</td><td><b>White</b><br />
+<tr style='border-bottom: 1px solid black'><td>&nbsp;</td><td><b>White</b><br />
 <div class="stopwatch" id='w-clock'></div>
 </td>
 <td><b>Black</b><br />
