@@ -64,3 +64,19 @@ func TestMiniMax(t *testing.T) {
 		t.Error("WRONG MOVE!!!")
 	}
 }
+
+func TestBlackKillQueen(t *testing.T) {
+	fenPlacement := "r1bqk2r/1pp1b3/p1PpQn1p/6p1/8/2PBBN1P/PP3PP1/R3K2R"
+	board := createBoardUsingFen(fenPlacement)
+
+	//black should kill the white queen
+	node := createState(board, "b", "e4-e6")
+
+	move := miniMaxDecision(node)
+	fmt.Println("move = ", move)
+
+	//the black pawn should attack this square!
+	if move != "\"next-move\":\"c8-e6\"" {
+		t.Error("WRONG MOVE!!!")
+	}
+}

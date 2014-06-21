@@ -18,6 +18,7 @@ func miniMaxDecision(state ChessNode) string {
 	for i := 0; i < len(moves); i++ {
 		//ns := nextState(state, moves[i])
 		//ns.active_color = state.active_color
+		//fmt.Println("moves[", i, "]", moves[i])
 		newBoard := makeMove(state.board, moves[i])
 		u := utility(opposite(state.active_color), newBoard)
 		//fmt.Println("u=", u)
@@ -90,7 +91,7 @@ func minValue(state ChessNode) int {
 func terminalTest(state ChessNode) bool {
 	//TODO check for checkmate
 	//stop at a certain depth, then return the utility
-	if state.depth >= 2 {
+	if state.depth >= 1 {
 		return true
 	}
 	return false
