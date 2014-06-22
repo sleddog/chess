@@ -886,6 +886,9 @@ function get_move_from_server(selectedMove) {
         if(data['next-move']) {
             make_move(data['next-move']);
         }
+        if(data['stats']) {
+            update_stats(data['stats']);
+        }
     });
 }
 
@@ -1474,68 +1477,73 @@ function enableReview(enable) {
 
 //JS object to store a chess clock timer
 var ChessClock = function(elem) {
-  var timer = createClock();
-  var offset;
-  var clock;
-  var interval;
-  
-  elem.appendChild(timer);
-  
-  clock = 0;
-  refreshClock();
-  
-  function createClock() {
-    return document.createElement("span");
-  }
-  
-  function start() {
-    if (!interval) {
-      offset   = Date.now();
-      interval = setInterval(update, 1);
-    }
-  }
-  
-  function stop() {
-    if (interval) {
-      clearInterval(interval);
-      interval = null;
-    }
-  }
-  
-  function update() {
-    clock += timeDiff();
+    var timer = createClock();
+    var offset;
+    var clock;
+    var interval;
+    
+    elem.appendChild(timer);
+    
+    clock = 0;
     refreshClock();
-  }
-  
-  function refreshClock() {
-    var totalSec = Math.round(clock/1000);
-    var hours = parseInt( totalSec / 3600 ) % 24;
-    var minutes = parseInt( totalSec / 60 ) % 60;
-    var seconds = totalSec % 60;
-    var result = (hours < 10 ? "0" + hours : hours) + "-" + 
-                 (minutes < 10 ? "0" + minutes : minutes) + "-" + 
-                 (seconds  < 10 ? "0" + seconds : seconds);    
-    timer.innerHTML = result; 
-  }
-  
-  function timeDiff() {
-    var now = Date.now();
-    var d = now - offset;
-    offset = now;
-    return d;
-  }
-  
-  this.start  = start;
-  this.stop   = stop;
+    
+    function createClock() {
+      return document.createElement("span");
+    }
+    
+    function start() {
+      if (!interval) {
+        offset   = Date.now();
+        interval = setInterval(update, 1);
+      }
+    }
+    
+    function stop() {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    }
+    
+    function update() {
+      clock += timeDiff();
+      refreshClock();
+    }
+    
+    function refreshClock() {
+      var totalSec = Math.round(clock/1000);
+      var hours = parseInt( totalSec / 3600 ) % 24;
+      var minutes = parseInt( totalSec / 60 ) % 60;
+      var seconds = totalSec % 60;
+      var result = (hours < 10 ? "0" + hours : hours) + "-" + 
+                   (minutes < 10 ? "0" + minutes : minutes) + "-" + 
+                   (seconds  < 10 ? "0" + seconds : seconds);    
+      timer.innerHTML = result; 
+    }
+    
+    function timeDiff() {
+      var now = Date.now();
+      var d = now - offset;
+      offset = now;
+      return d;
+    }
+    
+    this.start  = start;
+    this.stop   = stop;
 };
+
+function update_stats(stats) {
+    console.log('update_stats()');
+    console.log(stats);
+}
 
 //onload
 (function() {
-  init_board('<?=$board_to_draw; ?>');
+    init_board('<?=$board_to_draw; ?>');
 
-  //create clocks
-  wClock = new ChessClock(document.getElementById("w-clock"));
-  bClock = new ChessClock(document.getElementById("b-clock"));
+    //create clocks
+    wClock = new ChessClock(document.getElementById("w-clock"));
+    bClock = new ChessClock(document.getElementById("b-clock"));
 
 })();
 
