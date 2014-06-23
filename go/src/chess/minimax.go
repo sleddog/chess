@@ -8,7 +8,7 @@ import (
 //Minimax-Decision(state) returns an action
 //v = Max-Value(state)
 //return the action in successors(state) with value v
-func miniMaxDecision(state ChessNode) string {
+func miniMaxDecision(state ChessNode) (move string, stats string) {
 	//fmt.Println("miniMaxDecision(state=", state, ")")
 	//fmt.Println("pre utility = ", state.utility_value)
 	v := minValue(state)
@@ -16,18 +16,15 @@ func miniMaxDecision(state ChessNode) string {
 	moves := successors(state)
 	var equalMoves []Move
 	for i := 0; i < len(moves); i++ {
-		//ns := nextState(state, moves[i])
-		//ns.active_color = state.active_color
 		//fmt.Println("moves[", i, "]", moves[i])
 		newBoard := makeMove(state.board, moves[i])
-		u := utility(opposite(state.active_color), newBoard)
+		u := utility(state.active_color, newBoard)
 		//fmt.Println("u=", u)
 		if v == u {
 			//fmt.Println("FOUND, move =", moves[i])
 			equalMoves = append(equalMoves, moves[i])
 		}
 	}
-	move := ""
 	if equalMoves != nil {
 		randMove := equalMoves[rand.Intn(len(equalMoves))]
 		move = formatNextMove(randMove)
@@ -36,7 +33,8 @@ func miniMaxDecision(state ChessNode) string {
 		randMove := moves[rand.Intn(len(moves))]
 		move = formatNextMove(randMove)
 	}
-	return move
+	stats = formatStats()
+	return move, stats
 }
 
 //Max-Value(state) returns a utility value
@@ -46,12 +44,12 @@ func miniMaxDecision(state ChessNode) string {
 //  v <= Max(v, Min-Value(s))
 //return v
 func maxValue(state ChessNode) int {
+	updateStats(state, 1)
 	if terminalTest(state) {
 		return state.utility_value
 	}
 
 	v := -9999999
-
 	moves := successors(state)
 	for i := 0; i < len(moves); i++ {
 		s := minValue(nextState(state, moves[i]))
@@ -70,6 +68,7 @@ func maxValue(state ChessNode) int {
 //  v <= Min(v, Max-Value(s))
 //return v
 func minValue(state ChessNode) int {
+	updateStats(state, 1)
 	//fmt.Println("minValue, state=", state)
 	if terminalTest(state) {
 		return state.utility_value
@@ -77,7 +76,6 @@ func minValue(state ChessNode) int {
 
 	v := 9999999
 	moves := successors(state)
-	//state.active_color = opposite(state.active_color)
 	for i := 0; i < len(moves); i++ {
 		s := maxValue(nextState(state, moves[i]))
 		if s <= v {
@@ -91,7 +89,7 @@ func minValue(state ChessNode) int {
 func terminalTest(state ChessNode) bool {
 	//TODO check for checkmate
 	//stop at a certain depth, then return the utility
-	if state.depth >= 1 {
+	if state.depth >= 2 {
 		return true
 	}
 	return false
@@ -104,7 +102,8 @@ func successors(state ChessNode) []Move {
 }
 
 func utility(color string, board [8][8]string) int {
-	return calculatePointValue(color, board) - calculatePointValue(opposite(color), board)
+	//return calculatePointValue(color, board)// -
+	return calculatePointValue(opposite(color), board)
 }
 
 func nextState(state ChessNode, move Move) ChessNode {

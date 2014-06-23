@@ -1,6 +1,7 @@
 package chess
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"sort"
@@ -11,10 +12,11 @@ import (
 //Get Next move using mini max algorithm
 func GetNextMoveUsingMiniMax(dat []string, prev_move string) string {
 	var move string
+	var stats string
 	active_color := "b"
 	node := createChessNodeUsingArray(dat, active_color, prev_move)
-	move = miniMaxDecision(node)
-	return move
+	move, stats = miniMaxDecision(node)
+	return move + "," + stats
 }
 
 // Get Next Move based on minimizing opponent material value
@@ -57,6 +59,7 @@ func GetNextMoveUsingPointValue(dat []string) string {
 //define global variables
 var pieces = make(map[string]map[string]string)
 var initial_board_json string
+var number_of_nodes_per_depth = make(map[string]int)
 
 func init() {
 	//set the random seed
@@ -91,6 +94,21 @@ func formatNextMove(move Move) string {
 	toSquare := string(columns[move.to.col]) + strconv.Itoa(move.to.row+1)
 	nextMove := fmt.Sprintf("\"next-move\":\"%s-%s\"", fromSquare, toSquare)
 	return nextMove
+}
+
+func updateStats(state ChessNode, count int) {
+	key := strconv.Itoa(state.depth) + opposite(state.active_color)
+	number_of_nodes_per_depth[key] += count
+}
+
+func formatStats() string {
+	b, err := json.Marshal(number_of_nodes_per_depth)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	stats := fmt.Sprintf("\"stats\":%s", string(b))
+	return stats
 }
 
 func calculatePointValue(color string, board [8][8]string) int {

@@ -55,9 +55,11 @@ func TestMiniMax(t *testing.T) {
 
 	//the white queen moved into the black pawn's attack square
 	node := createState(board, "b", "g3-g4")
+	printNode(node)
 
-	move := miniMaxDecision(node)
+	move, stats := miniMaxDecision(node)
 	fmt.Println("move = ", move)
+	fmt.Println("stats = ", stats)
 
 	//the black pawn should attack this square!
 	if move != "\"next-move\":\"h5-g4\"" {
@@ -72,11 +74,46 @@ func TestBlackKillQueen(t *testing.T) {
 	//black should kill the white queen
 	node := createState(board, "b", "e4-e6")
 
-	move := miniMaxDecision(node)
+	move, stats := miniMaxDecision(node)
 	fmt.Println("move = ", move)
+	fmt.Println("stats = ", stats)
 
-	//the black pawn should attack this square!
+	//black should attack this square!
 	if move != "\"next-move\":\"c8-e6\"" {
 		t.Error("WRONG MOVE!!!")
 	}
+}
+
+//black bishop shouldn't kill pawn on h3 because he would die next move
+//tests 2 depth check of own material
+func TestBlackBishopDontKillPawn(t *testing.T) {
+	fenPlacement := "r2qk2r/2p1b3/p1ppbn1p/6p1/8/2PBBNPP/PP1K1P2/R6R"
+	board := createBoardUsingFen(fenPlacement)
+
+	//active color is black, last move = white moved king from d1-d2
+	node := createState(board, "b", "d1-d2")
+
+	//get move
+	move, stats := miniMaxDecision(node)
+	fmt.Println("move = ", move)
+	fmt.Println("stats = ", stats)
+
+	//the black bishop should NOT attack this square
+	if move == "\"next-move\":\"e6-h3\"" {
+		t.Error("BAD MOVE... Bishop Dies")
+	}
+}
+
+func TestMakeMoveWithMiniMax(t *testing.T) {
+	fenPlacement := "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR"
+	fmt.Println("fen = ", fenPlacement)
+	board := createBoardUsingFen(fenPlacement)
+
+	//test AI making 2nd move
+	node := createState(board, "b", "e2-e4")
+
+	//get move
+	move, stats := miniMaxDecision(node)
+	fmt.Println("move = ", move)
+	fmt.Println("stats = ", stats)
 }
