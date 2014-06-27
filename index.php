@@ -234,6 +234,11 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
   </p>
   </div>
 <br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
+<br />
+<hr />
+<span style='font-size:10px'><b>Console:</b></span><br />
+<div id='chess_console' style='border: 1px solid #dddddd; font-size: 10px'>
+</div>
 </td>
 </tr></table>
 <hr />
@@ -887,7 +892,7 @@ function get_move_from_server(selectedMove) {
             make_move(data['next-move']);
         }
         if(data['stats']) {
-            update_stats(data['stats']);
+            update_stats(data);
         }
     });
 }
@@ -1532,9 +1537,21 @@ var ChessClock = function(elem) {
     this.stop   = stop;
 };
 
-function update_stats(stats) {
+function update_stats(data) {
+    var stats = data['stats'];
+    var next_move = data['next-move'];
     console.log('update_stats()');
     console.log(stats);
+    var chess_console = document.getElementById('chess_console');
+    chess_console.innerHTML += 'black selected: <b>'+next_move+'</b><br />';
+    chess_console.innerHTML += '# boards evaluated per depth:<br />';
+    for (var key in stats) {
+        if (stats.hasOwnProperty(key)) {
+            console.log(key, stats[key]);
+            chess_console.innerHTML += key + ":" + stats[key] + " | ";
+        }
+    }
+    chess_console.innerHTML += '<hr style="margin:5px"/>';
 }
 
 //onload
