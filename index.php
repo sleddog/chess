@@ -235,10 +235,6 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
   </div>
 <br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
 <br />
-<hr />
-<span style='font-size:10px'><b>Console:</b></span><br />
-<div id='chess_console' style='border: 1px solid #dddddd; font-size: 10px'>
-</div>
 </td>
 </tr></table>
 <hr />
@@ -246,6 +242,10 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <input type='text' class='input-lg' style='width:700px' id='fen_record' name='fen_record' value="<?=$fen;?>" />
 <br />
 <a href="javascript:void(0);" onclick="open_fen_in_new_tab()" />Open in New Tab</a>
+<hr />
+<span style='font-size:10px'><b>Console:</b></span><br />
+<div id='chess_console' style='border: 1px solid #dddddd; font-size: 10px'>
+</div>
 <hr />
 FEN History (<a href="javascript:void(0);" onclick="toggle_fen_history()" />+/-</a>):<br />
 <div style='display:none' id='fen_history'>
