@@ -1542,16 +1542,18 @@ function update_stats(data) {
     var next_move = data['next-move'];
     console.log('update_stats()');
     console.log(stats);
-    var chess_console = document.getElementById('chess_console');
-    chess_console.innerHTML += 'black selected: <b>'+next_move+'</b><br />';
-    chess_console.innerHTML += '# boards evaluated per depth:<br />';
+    var entry = ""
+    entry += 'black selected: <b>'+next_move+'</b><br />';
+    entry += '# boards evaluated per depth:<br />';
     for (var key in stats) {
         if (stats.hasOwnProperty(key)) {
             console.log(key, stats[key]);
-            chess_console.innerHTML += key + ":" + stats[key] + " | ";
+            entry += key + ":" + stats[key] + " | ";
         }
     }
-    chess_console.innerHTML += '<hr style="margin:5px"/>';
+    entry += '<hr style="margin:5px"/>';
+    var chess_console = document.getElementById('chess_console');
+    chess_console.innerHTML = entry + chess_console.innerHTML;
 }
 
 //onload
