@@ -275,6 +275,7 @@ var saved_board_state = null;
 var timers = [];
 timers['w'] = null;
 timers['b'] = null;
+var game_over = false;
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -471,8 +472,8 @@ function format_move(next_move, color, promotion_choice)
     // determine if the opposite king is in check
     king_in_check = king_is_in_check(opposite(color), board, old_coord, new_coord)
     // determine if the game is over... i.e. checkmate
-    gameOver = is_game_over(opposite(color), board, old_coord, new_coord);
-    if(gameOver) { //game is over (i.e. no legal moves)
+    game_over = is_game_over(opposite(color), board, old_coord, new_coord);
+    if(game_over) { //game is over (i.e. no legal moves)
         if(king_in_check) { //and king is in check
             formattedMove += "#"; //CHECKMATE!
             update_game_over_box(color, 'checkmate');
@@ -1122,6 +1123,12 @@ function update_timer(player) {
     }
     else { //player == 'b'
         wClock.start();
+        bClock.stop();
+    }
+
+    if(game_over) {
+        //stop timers
+        wClock.stop();
         bClock.stop();
     }
 }
