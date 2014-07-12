@@ -875,6 +875,15 @@ function submit_move() {
     get_next_move(selectedMove);
 }
 
+function addStatsToConsole(player, move, formattedMove) {
+    var elapsed_time = (player == 'w') ? wClock.timestamp() : bClock.timestamp();
+    var entry = 'Elapsed Time: ' + elapsed_time + '<br />';
+    entry += (player == 'w') ? 'white (Human)' : 'black (AI)';
+    entry += ' selected: <b>'+move+'</b>'
+    entry += '&nbsp;&nbsp;&nbsp;or&nbsp;&nbsp;&nbsp;'+formattedMove+'<br />';
+    addToConsole(entry);
+}
+
 function get_next_move(selectedMove) {
     //determine what mode we are in... human vs human, human vs AI
     //assuming for now to just be simple random AI
@@ -889,12 +898,14 @@ function get_move_from_server(selectedMove) {
     move: selectedMove //"e2-e4" this will be a legal chess move
   })
     .done(function( data ) {
-        if(data['next-move']) {
-            make_move(data['next-move']);
-        }
+        addToConsole('<hr style="margin:5px"/>');
         if(data['stats']) {
             update_stats(data);
         }
+        if(data['next-move']) {
+            make_move(data['next-move']);
+        }
+        addToConsole('<hr style="margin:5px"/>');
     });
 }
 
@@ -912,6 +923,7 @@ function make_move(next_move) {
         fullmove_number++;
         calculate_fen('w', moves[0], moves[1]);
         move_pieces(moves[0], moves[1]);
+        
         //update the history
         update_history('b', next_move, formattedMove);
     }
@@ -1076,6 +1088,9 @@ function clear_legal_moves() {
 
 
 function update_history(player, move, formattedMove) {
+    //update console
+    addStatsToConsole(player, move, formattedMove);
+
     var table = document.getElementById('move_history_table');
     if(!table) {
         return;
@@ -1400,6 +1415,7 @@ function toggle_fen_history() {
 function update_fen_history(fen) {
     var link = '<a href="javascript:void(0);" onclick="open_fen_in_new_tab(\''+fen+'\');" />'+fen+'</a><br />'
     document.getElementById('fen_history').innerHTML += link;
+    addToConsole(link);
 }
 
 
@@ -1500,48 +1516,53 @@ var ChessClock = function(elem) {
     refreshClock();
     
     function createClock() {
-      return document.createElement("span");
+        return document.createElement("span");
     }
     
     function start() {
-      if (!interval) {
-        offset   = Date.now();
-        interval = setInterval(update, 1);
-      }
+        if (!interval) {
+            offset   = Date.now();
+            interval = setInterval(update, 1);
+        }
     }
     
     function stop() {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
+        if (interval) {
+            clearInterval(interval);
+            interval = null;
+        }
     }
     
     function update() {
-      clock += timeDiff();
-      refreshClock();
+        clock += timeDiff();
+        refreshClock();
+    }
+    
+    function timestamp() {
+        var totalSec = Math.round(clock/1000);
+        var hours = parseInt( totalSec / 3600 ) % 24;
+        var minutes = parseInt( totalSec / 60 ) % 60;
+        var seconds = totalSec % 60;
+        var result = (hours < 10 ? "0" + hours : hours) + "-" + 
+                     (minutes < 10 ? "0" + minutes : minutes) + "-" + 
+                     (seconds  < 10 ? "0" + seconds : seconds);
+        return result; 
     }
     
     function refreshClock() {
-      var totalSec = Math.round(clock/1000);
-      var hours = parseInt( totalSec / 3600 ) % 24;
-      var minutes = parseInt( totalSec / 60 ) % 60;
-      var seconds = totalSec % 60;
-      var result = (hours < 10 ? "0" + hours : hours) + "-" + 
-                   (minutes < 10 ? "0" + minutes : minutes) + "-" + 
-                   (seconds  < 10 ? "0" + seconds : seconds);    
-      timer.innerHTML = result; 
+        timer.innerHTML = timestamp(); 
     }
     
     function timeDiff() {
-      var now = Date.now();
-      var d = now - offset;
-      offset = now;
-      return d;
+        var now = Date.now();
+        var d = now - offset;
+        offset = now;
+        return d;
     }
-    
+
     this.start  = start;
     this.stop   = stop;
+    this.timestamp = timestamp;
 };
 
 function update_stats(data) {
@@ -1550,7 +1571,6 @@ function update_stats(data) {
     console.log('update_stats()');
     console.log(stats);
     var entry = ""
-    entry += 'black selected: <b>'+next_move+'</b><br />';
     entry += '# boards evaluated per depth:<br />';
     for (var key in stats) {
         if (stats.hasOwnProperty(key)) {
@@ -1558,9 +1578,13 @@ function update_stats(data) {
             entry += key + ":" + stats[key] + " | ";
         }
     }
-    entry += '<hr style="margin:5px"/>';
+    entry += '<br />';
+    addToConsole(entry);
+}
+
+function addToConsole(msg) {
     var chess_console = document.getElementById('chess_console');
-    chess_console.innerHTML = entry + chess_console.innerHTML;
+    chess_console.innerHTML = msg + chess_console.innerHTML;
 }
 
 //onload
