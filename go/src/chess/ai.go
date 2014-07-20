@@ -102,18 +102,26 @@ func updateStats(state ChessNode, count int) {
 }
 
 func formatStats() string {
-	b, err := json.Marshal(number_of_nodes_per_depth)
+	data, err := json.Marshal(number_of_nodes_per_depth)
 	if err != nil {
 		fmt.Println(err)
 		return ""
 	}
-	stats := fmt.Sprintf("\"stats\":%s", string(b))
+	stats := fmt.Sprintf("\"stats\":%s", string(data))
 	return stats
 }
 
 func calculatePointValue(color string, board [8][8]string) int {
 	//sum up the point values of all of the chess pieces for this color
+	//part of the utility/evaulation function
+	//f(p) = 200(K-K')
+	//       + 9(Q-Q')
+	//       + 5(R-R')
+	//       + 3(B-B' + N-N')
+	//       + 1(P-P')
 	sum := 0
+	sum2 := 0
+	color2 := opposite(color)
 	for row := 7; row >= 0; row-- {
 		for col := 0; col < 8; col++ {
 			piece := board[row][col]
@@ -121,10 +129,22 @@ func calculatePointValue(color string, board [8][8]string) int {
 				continue
 			} else if piece[0:1] == color {
 				sum = sum + pieceValue(piece[1:2])
+			} else if piece[0:1] == color2 {
+				sum2 = sum2 + pieceValue(piece[1:2])
 			}
 		}
 	}
-	return sum
+	return sum - sum2
+}
+
+func calculateMobility(color string, board [8][8]string) int {
+	//count the number of legal moves
+	//part of the utility/evaluation function
+	//(M-M') M = Mobility (the number of legal moves)
+	moves := getLegalMoves(color, board)
+	color2 := opposite(color)
+	moves2 := getLegalMoves(color2, board)
+	return len(moves) - len(moves2)
 }
 
 func pieceValue(piece_type string) int {
@@ -139,6 +159,8 @@ func pieceValue(piece_type string) int {
 		return 5
 	case "q":
 		return 9
+	case "k":
+		return 200 // TODO research
 	default:
 		return 0
 	}

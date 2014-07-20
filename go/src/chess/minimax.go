@@ -18,7 +18,7 @@ func miniMaxDecision(state ChessNode) (move string, stats string) {
 	for i := 0; i < len(moves); i++ {
 		//fmt.Println("moves[", i, "]", moves[i])
 		newBoard := makeMove(state.board, moves[i])
-		u := utility(state.active_color, newBoard)
+		u := utility(opposite(state.active_color), newBoard)
 		//fmt.Println("u=", u)
 		if v == u {
 			//fmt.Println("FOUND, move =", moves[i])
@@ -43,13 +43,13 @@ func miniMaxDecision(state ChessNode) (move string, stats string) {
 //for a, s in Successors(state) do
 //  v <= Max(v, Min-Value(s))
 //return v
-func maxValue(state ChessNode) int {
+func maxValue(state ChessNode) float64 {
 	updateStats(state, 1)
 	if terminalTest(state) {
 		return state.utility_value
 	}
 
-	v := -9999999
+	v := -9999999.0
 	moves := successors(state)
 	for i := 0; i < len(moves); i++ {
 		s := minValue(nextState(state, moves[i]))
@@ -67,14 +67,14 @@ func maxValue(state ChessNode) int {
 //for a, s in Successors(state) do
 //  v <= Min(v, Max-Value(s))
 //return v
-func minValue(state ChessNode) int {
+func minValue(state ChessNode) float64 {
 	updateStats(state, 1)
 	//fmt.Println("minValue, state=", state)
 	if terminalTest(state) {
 		return state.utility_value
 	}
 
-	v := 9999999
+	v := 9999999.0
 	moves := successors(state)
 	for i := 0; i < len(moves); i++ {
 		s := maxValue(nextState(state, moves[i]))
@@ -89,7 +89,7 @@ func minValue(state ChessNode) int {
 func terminalTest(state ChessNode) bool {
 	//TODO check for checkmate
 	//stop at a certain depth, then return the utility
-	if state.depth >= 2 {
+	if state.depth >= 1 {
 		return true
 	}
 	return false
@@ -101,9 +101,24 @@ func successors(state ChessNode) []Move {
 	return moves
 }
 
-func utility(color string, board [8][8]string) int {
-	//return calculatePointValue(color, board)// -
-	return calculatePointValue(opposite(color), board)
+//Source: https://chessprogramming.wikispaces.com/Evaluation
+//f(p) = 200(K-K')
+//       + 9(Q-Q')
+//       + 5(R-R')
+//       + 3(B-B' + N-N')
+//       + 1(P-P')
+//       - 0.5(D-D' + S-S' + I-I')
+//       + 0.1(M-M') + ...
+//
+//KQRBNP = number of kings, queens, rooks, bishops, knights and pawns
+//D,S,I = doubled, blocked and isolated pawns
+//M = Mobility (the number of legal moves)
+func utility(color string, board [8][8]string) float64 {
+	pointValue := calculatePointValue(color, board)
+	//TODO D,S,I calculation
+	mobilityValue := calculateMobility(color, board)
+	final := float64(pointValue) + (0.1 * float64(mobilityValue))
+	return final
 }
 
 func nextState(state ChessNode, move Move) ChessNode {

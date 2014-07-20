@@ -117,3 +117,23 @@ func TestMakeMoveWithMiniMax(t *testing.T) {
 	fmt.Println("move = ", move)
 	fmt.Println("stats = ", stats)
 }
+
+func TestUtility(t *testing.T) {
+	//initial board config, utility should be 0
+	fenPlacement := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+	board := createBoardUsingFen(fenPlacement)
+	value := utility("w", board)
+	fmt.Println("value = ", value)
+
+	//initial board config, but black has no pawns
+	fenPlacement = "rnbqkbnr/8/8/8/8/8/PPPPPPPP/RNBQKBNR"
+	board = createBoardUsingFen(fenPlacement)
+	value = utility("w", board)
+	fmt.Println("value = ", value)
+
+	//initial board config, but no player has any pawns should be 0
+	fenPlacement = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR"
+	board = createBoardUsingFen(fenPlacement)
+	value = utility("w", board)
+	fmt.Println("value = ", value)
+}

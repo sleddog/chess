@@ -6,7 +6,7 @@ type ChessNode struct {
 	prev_move     Move
 	legal_moves   []Move
 	depth         int
-	utility_value int
+	utility_value float64
 }
 
 type Move struct {
