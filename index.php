@@ -604,13 +604,13 @@ function get_pawn_moves(color, bd, coord, ep_target) {
     if(color == 'w') {
         var newCoord = [coord[0]+1, coord[1]];
         //if first square in front is blank 
-        if(board[newCoord[0]][newCoord[1]] == 0) {
+        if(bd[newCoord[0]][newCoord[1]] == 0) {
             moves.push(newCoord);
 
             //now check 2 moves in front if on the 2nd row
             if(coord[0] == 1) {
                 var newCoord2 = [coord[0]+2, coord[1]];
-                if(board[newCoord2[0]][newCoord2[1]] == 0) {
+                if(bd[newCoord2[0]][newCoord2[1]] == 0) {
                     moves.push(newCoord2);
                 }
             } 
@@ -619,7 +619,7 @@ function get_pawn_moves(color, bd, coord, ep_target) {
         //can you attack diagonally?
         diag_right = [coord[0]+1, coord[1]+1];
         if(diag_right[1] <= 7) {
-            var piece = board[diag_right[0]][diag_right[1]];
+            var piece = bd[diag_right[0]][diag_right[1]];
             if(piece != 0) {
                 //if a piece exists and is black
                 if(piece.substring(0,1) == 'b') {
@@ -629,7 +629,7 @@ function get_pawn_moves(color, bd, coord, ep_target) {
         }
         diag_left = [coord[0]+1, coord[1]-1];
         if(diag_left[1] >= 0) {
-            var piece = board[diag_left[0]][diag_left[1]];
+            var piece = bd[diag_left[0]][diag_left[1]];
             if(piece != 0) {
                 //if a piece exists and is black
                 if(piece.substring(0,1) == 'b') {
