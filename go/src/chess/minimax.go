@@ -11,7 +11,7 @@ import (
 func miniMaxDecision(state ChessNode) (move string, stats string) {
 	//fmt.Println("miniMaxDecision(state=", state, ")")
 	//fmt.Println("pre utility = ", state.utility_value)
-	v := minValue(state)
+	v := maxValue(state)
 	//fmt.Println("v=", v)
 	moves := successors(state)
 	var equalMoves []Move
