@@ -1,12 +1,12 @@
 <?php
-/*-----------------------------------------------------------------------------  
+/*-----------------------------------------------------------------------------
  *  Chess By Devin Gray <devingray@gmail.com>
- *-----------------------------------------------------------------------------  
+ *-----------------------------------------------------------------------------
  *  This is an evolving chess application written by Devin Gray.  The languages
- *  used in this application are: PHP, HTML, and Javascript on the front-end, 
- *  which will invoke a CGI program written in C and/or Go on the back-end.  I 
- *  will experiment with many types of game modes and AI algorithms.  My goal 
- *  is to build an AI that can beat me consistently in a head to head match, 
+ *  used in this application are: PHP, HTML, and Javascript on the front-end,
+ *  which will invoke a CGI program written in C and/or Go on the back-end.  I
+ *  will experiment with many types of game modes and AI algorithms.  My goal
+ *  is to build an AI that can beat me consistently in a head to head match,
  *  or at the very least a fun game of chess!
  *---------------------------------------------------------------------------*/
 
@@ -147,12 +147,12 @@ function convert_fen_piece($char) {
 
 //define what board JSON to use for initial load
 if($_GET['random']) {
-    $board_to_draw = get_random_board(); 
+    $board_to_draw = get_random_board();
     //TODO create a convert board to fen function to display random board's initial fen
 }
 else if($_GET['fen']) {
     $fen = $_GET['fen'];
-    $board_to_draw = get_board_from_fen($fen); 
+    $board_to_draw = get_board_from_fen($fen);
 }
 else {
     $fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -226,9 +226,9 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 </div>
 <div id='review_controls' style='display:none'>
   <p style='font-size:35px; padding-left:5px; font-weight:bold'>
-    <a href="javascript:void(0);" onclick='enableReview(false);' id='review_off'>&#8634;</a> 
-    <a href="javascript:void(0);" onclick='review("beginning");' id='review_beginning'>&#8676;</a> 
-    <a href="javascript:void(0);" onclick='review("back");' id='review_back'>&#8672;</a> 
+    <a href="javascript:void(0);" onclick='enableReview(false);' id='review_off'>&#8634;</a>
+    <a href="javascript:void(0);" onclick='review("beginning");' id='review_beginning'>&#8676;</a>
+    <a href="javascript:void(0);" onclick='review("back");' id='review_back'>&#8672;</a>
     <a href="javascript:void(0);" onclick='review("forward");' id='review_forward'>&#8674;</a>
     <a href="javascript:void(0);" onclick='review("end");' id='review_end'>&#8677;</a>
   </p>
@@ -292,9 +292,9 @@ function letter_to_num(letter) {
 
 function init_board(board_json) {
     var board_config = JSON.parse(board_json);
-    board = new Array(8); 
+    board = new Array(8);
     for (var i=0; i<8; i++) {
-        board[i] = new Array(8); 
+        board[i] = new Array(8);
         for (var j=0; j<8; j++) {
             var letter = num_to_letter[j]
             var square = letter + (i+1);
@@ -413,7 +413,7 @@ function enable_submit_move() {
 
 // build a string representing the move in algebraic notation
 // http://en.wikipedia.org/wiki/Algebraic_notation_(chess)
-function format_move(next_move, color, promotion_choice) 
+function format_move(next_move, color, promotion_choice)
 {
     //split next_move into individual squares
     var moves = next_move.split('-');
@@ -487,7 +487,7 @@ function format_move(next_move, color, promotion_choice)
     else if(king_in_check) {
         formattedMove = formattedMove + "+";
     }
-    
+
     return formattedMove;
 }
 
@@ -603,7 +603,7 @@ function get_pawn_moves(color, bd, coord, ep_target) {
 
     if(color == 'w') {
         var newCoord = [coord[0]+1, coord[1]];
-        //if first square in front is blank 
+        //if first square in front is blank
         if(bd[newCoord[0]][newCoord[1]] == 0) {
             moves.push(newCoord);
 
@@ -613,7 +613,7 @@ function get_pawn_moves(color, bd, coord, ep_target) {
                 if(bd[newCoord2[0]][newCoord2[1]] == 0) {
                     moves.push(newCoord2);
                 }
-            } 
+            }
         }
 
         //can you attack diagonally?
@@ -669,7 +669,7 @@ function get_pawn_moves(color, bd, coord, ep_target) {
                 if(bd[newCoord2[0]][newCoord2[1]] == 0) {
                     moves.push(newCoord2);
                 }
-            } 
+            }
         }
 
         //can you attack diagonally?
@@ -718,7 +718,7 @@ function get_pawn_moves(color, bd, coord, ep_target) {
 
 function get_knight_moves(color, bd, coord) {
     //create an array of coords, based on knight's movement (L shape)
-    var moves = new Array(8); 
+    var moves = new Array(8);
     moves[0] = [coord[0]+2, coord[1]-1];
     moves[1] = [coord[0]+2, coord[1]+1];
     moves[2] = [coord[0]-2, coord[1]-1];
@@ -842,8 +842,8 @@ function submit_move() {
                 formattedMove = format_move(selectedMove, 'w', promotion_choice.toUpperCase());
                 document.getElementById(targetSquare).innerHTML = piece_to_html(promotedPiece);
                 break;
-            default: 
-                //en passant example notation = 'exd6e.p.'    
+            default:
+                //en passant example notation = 'exd6e.p.'
                 if(special_move.substring(4,8) == "e.p.") {
                     //need to remove the attacked pawn (this example pawn on d5)
                     var remove_square = targetSquare.substring(0,1) + "5"; //always 5th for white
@@ -887,7 +887,7 @@ function addStatsToConsole(player, move, formattedMove) {
 function get_next_move(selectedMove) {
     //determine what mode we are in... human vs human, human vs AI
     //assuming for now to just be simple random AI
-    get_move_from_server(selectedMove); 
+    get_move_from_server(selectedMove);
 }
 
 function get_move_from_server(selectedMove) {
@@ -923,7 +923,7 @@ function make_move(next_move) {
         fullmove_number++;
         calculate_fen('w', moves[0], moves[1]);
         move_pieces(moves[0], moves[1]);
-        
+
         //update the history
         update_history('b', next_move, formattedMove);
     }
@@ -1123,7 +1123,7 @@ function update_history(player, move, formattedMove) {
     history_cursor = ply_count;
     ply_count++;
 
-    //highlight what squares did the move    
+    //highlight what squares did the move
     set_highlighted_move(move)
 
     //update the timer
@@ -1168,7 +1168,7 @@ function set_highlighted_move(move) {
 }
 
 
-//return a string representing the FEN record for the current board 
+//return a string representing the FEN record for the current board
 //http://en.wikipedia.org/wiki/Forsyth-Edwards_Notation
 //example initial board:  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 function calculate_fen(active_color, from, to) {
@@ -1176,7 +1176,7 @@ function calculate_fen(active_color, from, to) {
     var fen_board = create_new_board(board, from, to);
 
     //6 part string separated by spaces
-    var fen = ""; 
+    var fen = "";
 
     //1. Piece placement
     fen += fen_piece_placement(fen_board) + " ";
@@ -1230,8 +1230,8 @@ function perform_special_moves(bd, from, to) {
                 //move the rook from a1 to d1
                 bd = move_pieces_on_board(bd, square_to_coord('a1'), square_to_coord('d1'));
                 break;
-            default: 
-                //en passant example notation = 'exd6e.p.'    
+            default:
+                //en passant example notation = 'exd6e.p.'
                 if(special_move.substring(4,8) == "e.p.") {
                     //need to remove the attacked pawn (this example pawn on d5)
                     var remove_square = to.substring(0,1) + "5"; //always 5th for white
@@ -1509,50 +1509,50 @@ var ChessClock = function(elem) {
     var offset;
     var clock;
     var interval;
-    
+
     elem.appendChild(timer);
-    
+
     clock = 0;
     refreshClock();
-    
+
     function createClock() {
         return document.createElement("span");
     }
-    
+
     function start() {
         if (!interval) {
             offset   = Date.now();
             interval = setInterval(update, 1);
         }
     }
-    
+
     function stop() {
         if (interval) {
             clearInterval(interval);
             interval = null;
         }
     }
-    
+
     function update() {
         clock += timeDiff();
         refreshClock();
     }
-    
+
     function timestamp() {
         var totalSec = Math.round(clock/1000);
         var hours = parseInt( totalSec / 3600 ) % 24;
         var minutes = parseInt( totalSec / 60 ) % 60;
         var seconds = totalSec % 60;
-        var result = (hours < 10 ? "0" + hours : hours) + "-" + 
-                     (minutes < 10 ? "0" + minutes : minutes) + "-" + 
+        var result = (hours < 10 ? "0" + hours : hours) + "-" +
+                     (minutes < 10 ? "0" + minutes : minutes) + "-" +
                      (seconds  < 10 ? "0" + seconds : seconds);
-        return result; 
+        return result;
     }
-    
+
     function refreshClock() {
-        timer.innerHTML = timestamp(); 
+        timer.innerHTML = timestamp();
     }
-    
+
     function timeDiff() {
         var now = Date.now();
         var d = now - offset;
