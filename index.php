@@ -41,7 +41,7 @@ function draw_chess_board_from_config($board_json) {
             $l = $num_to_letter[$j];
             $square = "$l$i";
             $color = (($j+$i) % 2 != 0) ? 'silver' : 'white';
-            $piece = property_exists($config, $square) ? $pieces[$config->$square]['html'] : '&nbsp;';
+            $piece = property_exists($config, $square) && isset($pieces[$config->$square]) ? $pieces[$config->$square]['html'] : '&nbsp;';
             $board .= "<td style='padding:0; margin:0; border:0px' valign='center' align='center'><button class='btn btn-default' id='$square' type='button' style='width:${square_size}px; height:${square_size}px; background-color: $color; font-size:${font_size}px; border-radius:0px;' onclick='square_select(this)'>$piece</button></td>";
         }
         $board .= '</tr>';
@@ -103,16 +103,24 @@ function get_board_from_fen($fen)
     global $num_to_letter, $pieces, $placement, $active_color, $castling_availability, $en_passant_target, $halfmove_clock, $fullmove_number;
 
     //split fen into its 6 parts
-    $fen_parts = split(" ", $fen);
+    $fen_parts = explode(" ", $fen);
+    $placement = null;
+    $active_color = null;
+    $castling_availability = null;
+    $en_passant_target = null;
+    $halfmove_clock = null;
+    $fullmove_number = null;
+    if (6 === count($fen_parts)) {
     $placement = $fen_parts[0];
     $active_color = $fen_parts[1];
     $castling_availability = $fen_parts[2];
     $en_passant_target = $fen_parts[3];
     $halfmove_clock = $fen_parts[4];
     $fullmove_number = $fen_parts[5];
+    }
 
     //example = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-    $rows = split("/", $placement);
+    $rows = explode("/", $placement);
     $currentRow = 8;
     $board = '{';
     foreach($rows as $row) {
