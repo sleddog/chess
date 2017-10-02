@@ -144,6 +144,7 @@ function convert_fen_piece($char) {
     return $color . strtolower($char);
 }
 
+$fen = '';
 
 //define what board JSON to use for initial load
 if(isset($_GET['random'])) {
