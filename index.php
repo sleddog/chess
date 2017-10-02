@@ -146,11 +146,11 @@ function convert_fen_piece($char) {
 
 
 //define what board JSON to use for initial load
-if($_GET['random']) {
+if(isset($_GET['random'])) {
     $board_to_draw = get_random_board();
     //TODO create a convert board to fen function to display random board's initial fen
 }
-else if($_GET['fen']) {
+else if(isset($_GET['fen'])) {
     $fen = $_GET['fen'];
     $board_to_draw = get_board_from_fen($fen);
 }
