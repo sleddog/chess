@@ -195,9 +195,9 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 
 <div id='promotion_selection' style='display:none'>
 <b>Promote Pawn:</b><br />
-<? foreach(array("n","b","r","q") as $type) { ?>
+<?php foreach(array("n","b","r","q") as $type) { ?>
 <button class="btn btn-default" id="promote_<?=$type;?>" type="button" style="width: 26px; height: 26px; font-size: 18px; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px; border: 1px solid black; background-color: <?= $type=='q' ? 'lightgreen' : 'white' ?>; padding: 0px; " onclick="promotion_select(this)"><?=$pieces['w'.$type]['html'];?></button>
-<? } ?>
+<?php } ?>
 <br />
 <hr />
 </div>
