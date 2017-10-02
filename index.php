@@ -233,7 +233,7 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
     <a href="javascript:void(0);" onclick='review("end");' id='review_end'>&#8677;</a>
   </p>
   </div>
-<br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PNG format</a> coming soon
+<br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PGN format</a> coming soon
 <br />
 </td>
 </tr></table>
