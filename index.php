@@ -885,7 +885,7 @@ function submit_move() {
     //TODO revisit history/review feature later...
     //hide review controls
     //enableReview(false);
-
+    waitingForBlack = true;
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
 }
