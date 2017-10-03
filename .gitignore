@@ -1,2 +1,4 @@
 /vendor/
 error_log
+dist/server.exe
+go/pkg/windows_amd64/chess.a

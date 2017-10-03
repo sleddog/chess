@@ -821,8 +821,14 @@ function get_king_moves(color, bd, coord) {
 		return lm;
 }
 
-
+var waitingForBlack = false;
 function submit_move() {
+    if(waitingForBlack){
+        // show a popup telling the user black has not played.
+        // just using an alert for testing.
+        alert("Black hasn't moved yet!")
+        return
+    }
     //validate one last time...
     if(selectedSquare == 0 || targetSquare == 0) {
         alert('error some how...');
@@ -879,7 +885,7 @@ function submit_move() {
     //TODO revisit history/review feature later...
     //hide review controls
     //enableReview(false);
-
+    waitingForBlack = true;
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
 }
@@ -913,6 +919,8 @@ function get_move_from_server(selectedMove) {
         }
         if(data['next-move']) {
             make_move(data['next-move']);
+            // allow the player to move.
+            waitingForBlack = false;
         }
         addToConsole('<hr style="margin:5px"/>');
     });
