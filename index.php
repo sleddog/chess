@@ -877,7 +877,7 @@ function submit_move() {
     move_pieces(selectedSquare, targetSquare);
 
     //play a move sound
-    play_move_sound();
+    play_move_sound('white', selectedSquare, targetSquare);
 
     //reset selections
     reset_initial_square();
@@ -893,8 +893,12 @@ function submit_move() {
     get_next_move(selectedMove);
 }
 
-function play_move_sound() {
+function play_move_sound(player, selectedSquare, targetSquare) {
+  window.speechSynthesis.speak(
+      new SpeechSynthesisUtterance(player + ' plays ' + selectedSquare + ' to ' + targetSquare)
+  );
   new Audio('resources/move.mp3').play();
+
 }
 
 function addStatsToConsole(player, move, formattedMove) {
@@ -926,7 +930,10 @@ function get_move_from_server(selectedMove) {
         }
         if(data['next-move']) {
             make_move(data['next-move']);
-            play_move_sound();
+
+            var moves = data['next-move'].split('-');
+            play_move_sound('black', moves[0], moves[1]);
+
             // allow the player to move.
             waitingForBlack = false;
         }
