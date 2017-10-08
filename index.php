@@ -876,6 +876,9 @@ function submit_move() {
     //move the piece
     move_pieces(selectedSquare, targetSquare);
 
+    //play a move sound
+    play_move_sound();
+
     //reset selections
     reset_initial_square();
 
@@ -888,6 +891,10 @@ function submit_move() {
     waitingForBlack = true;
     //now call the AI to get the computer's move
     get_next_move(selectedMove);
+}
+
+function play_move_sound() {
+  new Audio('resources/move.mp3').play();
 }
 
 function addStatsToConsole(player, move, formattedMove) {
