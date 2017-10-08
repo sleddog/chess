@@ -14,7 +14,7 @@ func randomMove(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	board := query["board"]
 	move := query["move"]
-	//fmt.Fprintf(w, "\"query\":\"", query, "\",")
+	//fmt.Fprintf(w, "\"query\":\"", query, "\",") 
 	//fmt.Fprintf(w, "\"board\":\"",board,"\",")
 	//fmt.Fprintf(w, chess.GetNextMoveUsingArray(board))
 	//fmt.Println("type:", reflect.TypeOf(board))
