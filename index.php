@@ -926,6 +926,7 @@ function get_move_from_server(selectedMove) {
         }
         if(data['next-move']) {
             make_move(data['next-move']);
+            play_move_sound();
             // allow the player to move.
             waitingForBlack = false;
         }
