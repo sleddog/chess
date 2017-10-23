@@ -285,6 +285,8 @@ var timers = [];
 timers['w'] = null;
 timers['b'] = null;
 var game_over = false;
+var victory_white = 0;
+var victory_black = 0;
 
 function piece_to_unicode(piece) {
     return pieces[piece]['codepoint'];
@@ -505,13 +507,39 @@ function update_game_over_box(color, outcome) {
     var msg = "";
     switch(outcome) {
         case 'checkmate':
-            msg = (color == 'w') ? "1-0  white wins" : "0-1  black wins";
+            (color == 'w') ? victory_white = victory_white +1 : victory_black = victory_black +1
+            msg = victory_white+"-"+victory_black;
+            msg = (color == 'w') ? msg+"white wins" : msg+"black wins";
             break;
         case 'stalemate':
             msg = "&frac12;";
             break;
     }
-    box.innerHTML = "<h2 style='padding-left:5px;'>"+msg+"</h2>";
+    box.innerHTML = "<h2 style='padding-left:5px;'>"+msg+"</h2><input class='btn btn-default btn-primary' id='play_again_button' type='button' value='Play Again' onclick='play_again()' disabled='true'/>";
+}
+
+function play_again() {
+    selectedSquare = 0;
+    targetSquare = 0;
+    legal_moves = [];
+    board = null;
+    num_to_letter = ['a','b','c','d','e','f','g','h'];
+    pieces = JSON.parse('<?=json_encode($pieces); ?>');
+    history = [];
+    ply_count = 0;
+    history_cursor = null;
+    highlighted_move;
+    halfmove_clock = 0;
+    fullmove_number = 1;
+    special_moves = {};
+    en_passant_target = "<?=$en_passant_target;?>";
+    promotion_choice = 'q';  // by default assume queen is desired promotion
+    review_mode = false;
+    saved_board_state = null;
+    timers = [];
+    timers['w'] = null;
+    timers['b'] = null;
+    game_over = false;
 }
 
 function is_game_over(color, bd, old_coord, new_coord) {
