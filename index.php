@@ -220,6 +220,9 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 
 <hr />
 <div id='game_over_div'></div>
+<input style='display:none' class='btn btn-default' id='reset_game_button' type='button' value='Reset Board' onclick='play_again();' />
+<br />
+
 <table id='move_history_table' width='180'>
 <tr style='border-bottom: 1px solid black'><td>&nbsp;</td><td><b>White</b><br />
 <div class="stopwatch" id='w-clock'></div>
@@ -228,6 +231,7 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
 <div class="stopwatch" id='b-clock'></div>
 </td></tr>
 </table>
+<br /><br />
 <div id='enable_review' style='display:none'>
   <p style='font-size:35px; padding-left:5px; font-weight:bold'>
     <a href='javascript:void(0);' onclick='enableReview(true)'>&#8672;</a>
@@ -241,10 +245,9 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
     <a href="javascript:void(0);" onclick='review("forward");' id='review_forward'>&#8674;</a>
     <a href="javascript:void(0);" onclick='review("end");' id='review_end'>&#8677;</a>
   </p>
-  </div>
 <br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PGN format</a> coming soon
-<input class='btn btn-default' id='reset_game_button' type='button' value='Reset' onclick='play_again();' />
 <br />
+  </div>
 </td>
 </tr></table>
 <hr />
@@ -521,10 +524,12 @@ function update_game_over_box(color, outcome) {
             game_over_msg = "stalemate";
             break;
     }
-    box.innerHTML = "<h3 style='padding-left:5px;'>"+msg+"</h3><input class='btn btn-default btn-primary' id='play_again_button' type='button' value='Play Again' onclick='play_again();' />";
+    box.innerHTML = "<h3 style='padding-left:5px;'>"+msg+"</h3>";
+    document.getElementById('reset_game_button').style='display:inline';
 }
 
 function play_again() {
+    document.getElementById('reset_game_button').style='display:none';
     //clear moves
     if(selectedSquare != 0 ) {
         reset_initial_square();
