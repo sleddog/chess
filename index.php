@@ -243,6 +243,7 @@ on <a href="https://github.com/sleddog/chess">github.com/sleddog/chess</a><br />
   </p>
   </div>
 <br /><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">PGN format</a> coming soon
+<input class='btn btn-default' id='reset_game_button' type='button' value='Reset' onclick='play_again();' />
 <br />
 </td>
 </tr></table>
@@ -285,6 +286,7 @@ var timers = [];
 timers['w'] = null;
 timers['b'] = null;
 var game_over = false;
+var game_over_msg = "";
 var victory_white = 0;
 var victory_black = 0;
 
@@ -301,8 +303,8 @@ function letter_to_num(letter) {
     return letters.indexOf(letter);
 }
 
-function init_board(board_json) {
-    var board_config = JSON.parse(board_json);
+function init_board() {
+    var board_config = JSON.parse('<?=$board_to_draw; ?>');
     board = new Array(8);
     for (var i=0; i<8; i++) {
         board[i] = new Array(8);
@@ -312,9 +314,11 @@ function init_board(board_json) {
             if (board_config.hasOwnProperty(square)) {
                 var value = board_config[square];
                 board[i][j] = value;
+                document.getElementById(square).innerHTML = piece_to_html(value);
             }
             else {
                 board[i][j] = 0;
+                document.getElementById(square).innerHTML = '&nbsp;';
             }
         }
     }
@@ -507,28 +511,34 @@ function update_game_over_box(color, outcome) {
     var msg = "";
     switch(outcome) {
         case 'checkmate':
-            (color == 'w') ? victory_white = victory_white +1 : victory_black = victory_black +1
+            (color == 'w') ? victory_white++ : victory_black++;
             msg = victory_white+"-"+victory_black;
-            msg = (color == 'w') ? msg+"white wins" : msg+"black wins";
+            game_over_msg = "checkmate ";
+            game_over_msg += (color == 'w') ? "white wins" : "black wins";
             break;
         case 'stalemate':
             msg = "&frac12;";
+            game_over_msg = "stalemate";
             break;
     }
-    box.innerHTML = "<h2 style='padding-left:5px;'>"+msg+"</h2><input class='btn btn-default btn-primary' id='play_again_button' type='button' value='Play Again' onclick='play_again()' disabled='true'/>";
+    box.innerHTML = "<h3 style='padding-left:5px;'>"+msg+"</h3><input class='btn btn-default btn-primary' id='play_again_button' type='button' value='Play Again' onclick='play_again();' />";
 }
 
 function play_again() {
-    selectedSquare = 0;
-    targetSquare = 0;
-    legal_moves = [];
-    board = null;
-    num_to_letter = ['a','b','c','d','e','f','g','h'];
-    pieces = JSON.parse('<?=json_encode($pieces); ?>');
+    //clear moves
+    if(selectedSquare != 0 ) {
+        reset_initial_square();
+    }
+    clear_highlighted_move()
+
+    //clear history
     history = [];
     ply_count = 0;
     history_cursor = null;
-    highlighted_move;
+    var table = document.getElementById('move_history_table');
+    while(table.rows.length > 1) {
+        table.deleteRow(table.rows.length-1);
+    }
     halfmove_clock = 0;
     fullmove_number = 1;
     special_moves = {};
@@ -540,6 +550,14 @@ function play_again() {
     timers['w'] = null;
     timers['b'] = null;
     game_over = false;
+    waitingForBlack = false;
+
+    //reset timers
+    wClock.reset();
+    bClock.reset();
+
+    //redraw board
+    init_board();
 }
 
 function is_game_over(color, bd, old_coord, new_coord) {
@@ -907,6 +925,10 @@ function submit_move() {
     //play a move sound
     play_move_sound('white', selectedSquare, targetSquare);
 
+    if(game_over) {
+        say_words(game_over_msg);
+    }
+
     //reset selections
     reset_initial_square();
 
@@ -921,12 +943,15 @@ function submit_move() {
     get_next_move(selectedMove);
 }
 
-function play_move_sound(player, selectedSquare, targetSquare) {
+function say_words(words) {
   window.speechSynthesis.speak(
-      new SpeechSynthesisUtterance(player + ' plays ' + selectedSquare + ' to ' + targetSquare)
+      new SpeechSynthesisUtterance(words)
   );
-  new Audio('resources/move.mp3').play();
+}
 
+function play_move_sound(player, selectedSquare, targetSquare) {
+  say_words(player + ' plays ' + selectedSquare + ' to ' + targetSquare);
+  new Audio('resources/move.mp3').play();
 }
 
 function addStatsToConsole(player, move, formattedMove) {
@@ -1025,7 +1050,7 @@ function highlight_legal_moves(selectedSquare) {
 }
 
 function get_all_legal_moves(color, bd, ep_target) {
-		var lm = [];
+    var lm = [];
     for (var i=0; i<8; i++) {
         for (var j=0; j<8; j++) {
             if(bd[i][j] != 0 && bd[i][j].substr(0,1) == color) {
@@ -1129,12 +1154,12 @@ function legal_move_color(square) {
 function get_king_location(color, bd) {
     for (var i=0; i<8; i++) {
         for (var j=0; j<8; j++) {
-						if(bd[i][j] == color+'k') {
+            if(bd[i][j] == color+'k') {
                 return [i,j];
             }
         }
     }
-		return null; //error king should always be present on the board
+    return null; //error king should always be present on the board
 }
 
 
@@ -1593,6 +1618,12 @@ var ChessClock = function(elem) {
         }
     }
 
+    function reset() {
+        clock=0;
+        stop();
+        refreshClock();
+    }
+
     function update() {
         clock += timeDiff();
         refreshClock();
@@ -1622,6 +1653,7 @@ var ChessClock = function(elem) {
 
     this.start  = start;
     this.stop   = stop;
+    this.reset  = reset;
     this.timestamp = timestamp;
 };
 
@@ -1649,7 +1681,7 @@ function addToConsole(msg) {
 
 //onload
 (function() {
-    init_board('<?=$board_to_draw; ?>');
+    init_board();
 
     //create clocks
     wClock = new ChessClock(document.getElementById("w-clock"));
